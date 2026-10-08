@@ -25,6 +25,9 @@ from env import CATALOGS, RESULTS
 MAX_DIST_PC = 60
 MAX_TMAG = 13.0
 MAX_STAR_RADIUS = 1.5  # R_sun; small stars make small planets detectable
+# Rcont = flux from neighbours / star flux in the TESS aperture. Many FFI-only "nearby" stars are
+# faint companions of much brighter stars (Rcont ~ 10-200): their light curves are the neighbour's.
+MAX_RCONT = 0.2
 MIN_SECTORS = 3
 MIN_YEARS_SPANNED = 2.0
 REF_RADIUS_EARTH = 1.5
@@ -146,7 +149,8 @@ def expected_snr(df):
     """SNR of REF_RADIUS_EARTH planet at REF_PERIOD_D, central transit, ~27 d per sector."""
     rs = df["Rad"].fillna(1.0).clip(0.1, MAX_STAR_RADIUS)
     ms = df["Mass"].fillna(rs).clip(0.08, 2.0)
-    depth_ppm = (REF_RADIUS_EARTH * R_EARTH_PER_R_SUN / rs) ** 2 * 1e6
+    # Neighbours' light dilutes the dip we'd observe by 1 / (1 + Rcont)
+    depth_ppm = (REF_RADIUS_EARTH * R_EARTH_PER_R_SUN / rs) ** 2 * 1e6 / (1 + df["Rcont"].fillna(0))
     # Duration (hr) for circular orbit, b=0: T ~ 13 hr * (P/365)^(1/3) * rho^(-1/3)
     rho = ms / rs ** 3
     dur_hr = 13.0 * (REF_PERIOD_D / 365.25) ** (1 / 3) * rho ** (-1 / 3)
@@ -164,6 +168,8 @@ def main():
     tic = tic[~tic["Disp"].isin(["SPLIT", "DUPLICATE", "ARTIFACT"])]
     tic = tic[(tic["LClass"] == "DWARF") & (tic["Rad"] < MAX_STAR_RADIUS)]
     print(f"  dwarfs with R < {MAX_STAR_RADIUS} R_sun: {len(tic)}")
+    tic = tic[tic["Rcont"] < MAX_RCONT]
+    print(f"  neighbour contamination < {MAX_RCONT}: {len(tic)}")
 
     known = known_hosts()
     tic = tic[~tic["TIC"].isin(known)]
