@@ -30,6 +30,7 @@ MIN_YEARS_SPANNED = 2.0
 REF_RADIUS_EARTH = 1.5
 REF_PERIOD_D = 10.0
 LC_AUTHORS = ["SPOC", "TESS-SPOC", "QLP"]
+RECENT_MJD = 60700  # ~Feb 2025: data likely not yet in multi-sector pipeline searches
 
 TIC_CSV = CATALOGS / "tic_nearby.csv"
 COVERAGE_CSV = CATALOGS / "tess_coverage.csv"
@@ -75,7 +76,7 @@ def fetch_tic(refresh=False):
     (Filtering TIC directly on distance is a full-table scan and times out.)
     """
     if TIC_CSV.exists() and not refresh:
-        return pd.read_csv(TIC_CSV)
+        return pd.read_csv(TIC_CSV, dtype={"TIC": np.int64})
     v = Vizier(columns=["GaiaEDR3", "Plx", "Gmag"], row_limit=-1, timeout=600)
     gcns = v.query_constraints(catalog="J/A+A/649/A6/table1c", Plx=f">{1000 / MAX_DIST_PC:.3f}",
                                Gmag=f"<{MAX_TMAG + 1}")[0].to_pandas()
@@ -89,6 +90,7 @@ def fetch_tic(refresh=False):
     tic = run_chunks(lookup, [str(g) for g in gcns["GaiaEDR3"]], 500, "tic")
     tic = tic.rename(columns={"ID": "TIC", "rad": "Rad", "mass": "Mass", "d": "Dist",
                               "lumclass": "LClass", "disposition": "Disp", "contratio": "Rcont"})
+    tic["TIC"] = tic["TIC"].astype(np.int64)  # MAST returns IDs as strings
     tic = tic.drop_duplicates("TIC")
     tic = tic[(tic["Tmag"] < MAX_TMAG) & (tic["Dist"] < MAX_DIST_PC)]
     tic.to_csv(TIC_CSV, index=False)
@@ -131,6 +133,10 @@ def summarize_coverage(cov):
         "has_2min": g.apply(lambda d: bool(((d.provenance_name == "SPOC") & (d.t_exptime <= 120)).any()),
                             include_groups=False),
         "authors": g["provenance_name"].apply(lambda x: ",".join(sorted(set(x)))),
+        # 2-min stars get SPOC's deepest multi-sector search; FFI-only stars are where gaps remain
+        "n_2min": g.apply(lambda d: d.loc[d.provenance_name == "SPOC", "sequence_number"].nunique(),
+                          include_groups=False),
+        "has_recent": g["t_min"].max() > RECENT_MJD,
     })
     s["years_spanned"] = (s["last_mjd"] - s["first_mjd"]) / 365.25
     return s.reset_index()
@@ -180,6 +186,9 @@ def main():
     show = ["TIC", "Tmag", "Teff", "Rad", "Dist", "n_sectors", "years_spanned", "has_2min",
             "authors", "depth_ppm", "snr_ref"]
     print(df[show].head(20).round(2).to_string(index=False))
+    ffi = df[~df["has_2min"] & (df["snr_ref"] >= 10)]
+    print(f"\nFFI-only stars (never 2-min) with SNR>=10: {len(ffi)} "
+          f"({ffi['has_recent'].sum()} with 2025+ data)")
 
 
 if __name__ == "__main__":
