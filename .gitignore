@@ -1,0 +1,9 @@
+.venv/
+cache/
+data/lightcurves/
+data/pixels/
+__pycache__/
+*.pyc
+.DS_Store
+data/catalogs/_chunks_*/
+results/*.log
