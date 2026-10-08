@@ -45,8 +45,9 @@ def search_star(args):
             # keep a downsampled periodogram (max SDE per log-period bin) for plots
             edges = np.geomspace(periods.min(), periods.max(), 4001)
             idx = np.clip(np.digitize(periods, edges) - 1, 0, 3999)
-            pg = np.full(4000, np.nan)
+            pg = np.full(4000, -np.inf)  # not NaN: max(NaN, x) stays NaN
             np.maximum.at(pg, idx, sde)
+            pg[~np.isfinite(pg)] = np.nan
             np.savez_compressed(PERIODOGRAMS / f"{tic}.npz", period=np.sqrt(edges[1:] * edges[:-1]), sde=pg)
             rec = {"tic": tic, "status": "ok", "rejected": bad,
                    "sectors_used": sorted(int(s) for s in np.unique(c["sector"])),

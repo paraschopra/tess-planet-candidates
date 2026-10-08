@@ -146,6 +146,32 @@ def transit_mask(t, period, t0, duration, factor=1.5):
     return np.abs(phase) < factor * duration / 2
 
 
+def signal_stats(bls, res, k, n_periods):
+    """Signal dict for entry k of a BLS result."""
+    P, t0, dur = res.period[k], res.transit_time[k], res.duration[k]
+    stats = bls.compute_stats(P, dur, t0)
+    return {
+        "period": float(P), "t0": float(t0), "duration_hr": float(dur * 24),
+        "depth_ppm": float(res.depth[k] * 1e6), "depth_err_ppm": float(res.depth_err[k] * 1e6),
+        "snr": float(res.depth[k] / res.depth_err[k]),
+        "n_transits": int(np.sum(stats["per_transit_count"] > 0)),
+        "depth_odd_ppm": float(stats["depth_odd"][0] * 1e6),
+        "depth_odd_err_ppm": float(stats["depth_odd"][1] * 1e6),
+        "depth_even_ppm": float(stats["depth_even"][0] * 1e6),
+        "depth_even_err_ppm": float(stats["depth_even"][1] * 1e6),
+        "depth_half_ppm": float(stats["depth_half"][0] * 1e6),
+        "harmonic_dll": float(stats["harmonic_delta_log_likelihood"]),
+        "n_periods": n_periods,
+    }
+
+
+def bls_search_at(lc, rho_sun, period):
+    """BLS at one known period (best duration and epoch), e.g. to test vetting on injected signals."""
+    bls = BoxLeastSquares(lc["time"], lc["flux"], lc["flux_err"])
+    res = bls.power([period], duration_grid(rho_sun), objective="snr")
+    return {"signal": 1, **signal_stats(bls, res, 0, 1), "sde": np.nan}
+
+
 def bls_search(lc, rho_sun, max_signals=MAX_SIGNALS):
     """Iterative BLS: find the best signal, record it, mask its transits, repeat."""
     t, y, dy = lc["time"], lc["flux"], lc["flux_err"]
