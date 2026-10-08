@@ -143,3 +143,105 @@ Signals that survive everything are candidates worth reporting.
 - **Phase 5: reporting.** Write it up and submit a CTOI to ExoFOP, where professional astronomers coordinate follow-up. Optionally publish predicted transit times in advance (preregistration on Zenodo) and propose 2-minute observations to TESS.
 
 Only follow-up by other telescopes, measuring the planet's mass or confirming the dips from the ground, can turn a candidate into a confirmed planet.
+
+---
+
+## Part 3: Phase 2 results (2026-10-08)
+
+### What changed from the plan, and why
+
+**1. Most "never 2-minute" stars at the top of the first ranking were fakes.** Each star has a *contamination ratio*: how much light from neighbouring stars falls into the same TESS pixels, relative to the star's own light. The top-ranked stars had ratios of 68–222. They were faint companions sitting right next to stars ~100× brighter, so their light curves were mostly the neighbour's light. That is probably *why* they were never chosen for 2-minute observation. We now:
+- reject stars with contamination ≥ 0.2;
+- divide each star's expected dip depth by (1 + contamination), because neighbours' light dilutes any dip.
+
+This left **526 target stars**, mostly K dwarfs (orange stars somewhat smaller than the Sun).
+
+**2. Some sectors are junk.** MIT's QLP light curves were 30–100× noisier than expected for some stars, for example a star next to the Large Magellanic Cloud, a crowded neighbouring galaxy. Each sector's noise is now measured, and sectors far noisier than the star's typical sector are dropped before searching.
+
+### How we tested the search: planting fake planets
+
+The search could look like it is working when it isn't. To check, we used a technique called **injection-recovery**: plant artificial planets into real data, then see whether the search finds them.
+
+1. **Take a real star's real light curve,** with all its genuine noise, flicker, gaps and instrument quirks.
+2. **Choose a fake planet:** a size (e.g. 1.5 Earth radii), a random orbital period (1–15 days) and a random starting time.
+3. **Work out what its transits would look like:**
+   - The depth follows from planet size versus the star's size, diluted by any neighbouring stars' light.
+   - The duration follows from the orbital period and the star's density, using Kepler's laws.
+4. **Subtract that dip** from the real brightness measurements at every moment the fake planet would be in front of the star.
+5. **Run the exact same pipeline** (cleaning, smoothing, searching) without telling it anything about the plant.
+6. **Check the answer.** A plant counts as recovered only if the search finds the right period (within 0.1%), the right timing, and a strong enough signal.
+
+Because the planted planet's true properties are known, this measures the pipeline's real sensitivity on real, messy data, not idealised noise. We used it three ways:
+
+- **Choosing the smoothing window.** The filter that removes slow stellar wobbles can also eat part of a transit. Using the same 16 plants (8 stars × 2), we tried four window lengths:
+
+  | Window | Recovered |
+  |---|---|
+  | 0.5 d | 3/16 |
+  | 0.75 d | **10/16** |
+  | 1.0 d | 8/16 |
+  | 1.5 d | 5/16 |
+
+  We kept 0.75 days, chosen by evidence rather than guesswork.
+- **Finding hidden signals.** Some plants were missed because the star already contained a *different*, stronger signal. The same unknown signal came up in both plants, which flagged those stars as interesting.
+- **Calibrating the red-flag tests.** A test that rejects impostors must not reject real planets. We ran every red-flag test on planted planets, which by construction have equal odd/even dips and no secondary eclipse. Two tests fired on 15–25% of genuine plants. The cause: their error bars assumed independent noise, but real stars and instruments produce correlated wiggles lasting hours. We replaced those error bars with an **empirical** noise estimate (place the same box at 40 random off-transit times and measure the spread). Misfires dropped to 5%. Every flag threshold was checked this way.
+
+### The search
+- 526 stars, 1–44 sectors each, spanning up to 7.5 years.
+- About a million trial periods per star, from 0.5 to 25 days.
+- Up to 3 signals per star: find a signal, mask it, search again.
+- About 1.5 hours on 12 cores.
+
+### Triage: automatic red flags
+743 signals passed the basic thresholds (SDE ≥ 7, SNR ≥ 6, ≥ 3 transits). Each was then tested for impostor signatures.
+
+**Hard flags** are direct evidence against a planet:
+- odd/even mismatch or a secondary eclipse (an eclipsing star);
+- the same period re-found after masking (stellar variability);
+- the dip is too long for the orbit;
+- one or two events dominate (glitches);
+- the dip sits at data-gap edges;
+- per-sector depths disagree;
+- the dip is part of a broad depression;
+- the same period appears in ≥ 3 other stars (instrument systematic);
+- the dip is too deep to be a planet.
+
+**Soft flags** are context that makes a signal suspicious but isn't proof:
+- the period falls in a crowded range (huge pile-ups at 12–25 d near TESS's 13.7-day orbit, and at 0.5–1 d from stellar variability);
+- the period is near the TESS orbit;
+- the signal is weak under realistic noise.
+
+Results: **743 → 31 with no hard flags → 10 with no flags at all.** With ~1,500 searches, signals with SDE ≈ 7–8 are within reach of chance, so only the two with SDE > 10 stand out.
+
+### Lessons from looking at the pictures
+- `figures/306635397_s1.png`: an apparent Earth-sized planet with 42 transits. The per-sector panel shows that almost all the signal comes from two glitches, in sectors 87 and 97. This led to the "few events dominate" flag.
+- `figures/258748095_s2.png`: the dip sits inside a broad, wavy depression, and its depth swings between sectors. That is stellar variability, and it led to the "broad depression" and "inconsistent sectors" flags.
+
+### The two strongest candidates (not yet vetted; Phase 3 tests have not been run)
+
+| | TIC 370612437 | TIC 252721481 |
+|---|---|---|
+| Period | 3.5649 d | 4.9336 d |
+| Depth | ~204 ppm (0.02%) | ~252 ppm (0.025%) |
+| Duration | ~1.1 h | ~1.5 h |
+| Implied size | ~1.1 Earth radii | ~1.1 Earth radii |
+| Star | K dwarf, 4380 K, 0.66 R☉, Tmag 9.8 | K dwarf, 4301 K, 0.61 R☉, Tmag 9.7 |
+| Distance | 48 pc (~158 ly) | 41 pc (~134 ly) |
+| Data | 8 sectors, 2019–2025, 55 transits | 5 sectors, 2019–2025, 21 transits |
+| SDE / SNR | 11.3 / 8.4 | 10.3 / 8.1 |
+
+Both show:
+- a single clean periodogram peak;
+- a box-shaped folded dip;
+- consistent depth in *every* sector across six years;
+- matching odd/even dips;
+- no secondary eclipse.
+
+The two stars are 12° apart on the sky, so they cannot contaminate each other. They share sectors only because TESS observed that region at the same times.
+
+Caveats to resolve in Phase 3:
+- 370612437's dip is about half as long as a central transit would be. That suggests a grazing orbit, or wrong stellar parameters.
+- 370612437 has 12% light contamination from neighbours.
+- Neither has had pixel-level, catalog or literature checks yet.
+
+Figures: `figures/370612437_s1.png`, `figures/252721481_s1.png`.

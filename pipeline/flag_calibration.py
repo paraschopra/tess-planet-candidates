@@ -39,7 +39,8 @@ def trial(args):
             "secondary_sigma": d["depth_secondary_ppm"] / d["depth_secondary_err_ppm"],
             "dur_ratio": d["dur_ratio"], "top_event_frac": d["top_event_frac"],
             "top2_ratio": d["snr_without_top2"] / max(d["snr_all_events"], 1e-9),
-            "edge_frac": d["edge_frac"]}
+            "edge_frac": d["edge_frac"], "sector_p": d["sector_consistency_p"],
+            "wing_ratio": d["wing_depth_ppm"] / max(sig["depth_ppm"], 1e-9)}
 
 
 def main():
@@ -65,6 +66,8 @@ def main():
     print(f"  one_event (>0.5)          {np.mean(res.top_event_frac > 0.5):.2f}")
     print(f"  few_events (ratio <0.5)   {np.mean(res.top2_ratio < 0.5):.2f}")
     print(f"  edge (>0.5)               {np.mean(res.edge_frac > 0.5):.2f}")
+    print(f"  inconsistent_sectors      {np.mean(res.sector_p < 1e-3):.2f}")
+    print(f"  broad_depression (>0.4)   {np.mean(res.wing_ratio > 0.4):.2f}")
 
 
 if __name__ == "__main__":

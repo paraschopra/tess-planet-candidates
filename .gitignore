@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 data/catalogs/_chunks_*/
 results/*.log
+results/phase2/plots/
+results/phase2/periodograms/
+results/debug/

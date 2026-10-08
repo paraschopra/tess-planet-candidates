@@ -181,6 +181,8 @@ def bls_search(lc, rho_sun, max_signals=MAX_SIGNALS):
     signals = []
     mask = np.zeros(len(t), bool)
     for i in range(max_signals):
+        if (~mask).sum() < 500:  # a very short-period signal's mask can swallow the light curve
+            break
         tt, yy, ee = t[~mask], y[~mask], dy[~mask]
         bls = BoxLeastSquares(tt, yy, ee)
         res = bls.power(periods, durations, objective="snr")

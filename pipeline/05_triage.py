@@ -14,9 +14,16 @@ search thresholds, recomputes simple diagnostics on the cleaned light curve:
   secondary_eclipse    a > 3 sigma dip at phase 0.5 (an eclipsing star, not a planet)
   low_snr_red_noise    depth < 6 sigma, where sigma is measured empirically by placing the same box
                        at 40 off-transit phases (white-noise errors are 2-3x too small here)
+  inconsistent_sectors per-sector depths disagree (chi-square p < 1e-4, per-sector empirical noise)
+  broad_depression     flux 1-3 durations either side of the dip is > 40% as low as the dip itself
+                       (part of a slower wiggle, not a crisp transit)
   too_deep             implied radius > 25 R_earth (~2.2 R_jup) or depth > 3% (a star, not a planet)
   few_transits         fewer than 3 transits with data
-  common_period        same period (0.5%) appears in >= 3 different stars (instrument systematic)
+  common_period        same period (0.1%) in >= 3 other stars (instrument systematic)
+  crowded_period       > 3x the typical number of other stars' signals within +-3% in period
+                       (soft: TESS-orbit pile-up at 12-25 d, variability at 0.5-1 d)
+
+Hard flags are direct evidence of an impostor; soft flags (SOFT_FLAGS) are context.
 
 Writes results/phase2/triage.csv.
 Usage: python pipeline/05_triage.py [WORKERS]
@@ -30,12 +37,15 @@ import env  # noqa: F401
 import numpy as np
 import pandas as pd
 from astropy.timeseries import BoxLeastSquares
+from scipy.stats import chi2 as chi2_dist
 
 import lcsearch as L
 from env import RESULTS
 
 OUT = RESULTS / "phase2"
 TESS_ORBIT_D = 13.7
+# Context that makes a signal less likely but is not evidence against it on its own.
+SOFT_FLAGS = {"crowded_period", "tess_orbit_alias", "low_snr_red_noise"}
 R_EARTH_PER_R_SUN = 0.009168
 
 
@@ -88,6 +98,33 @@ def diagnostics_on(c, rec):
         null = np.array([box_depth(np.abs(((t - t0 - o + 0.5 * P) % P) - 0.5 * P) < dur / 2) for o in offsets])
         null = null[np.isfinite(null)]
         sigma_emp = 1.4826 * np.median(np.abs(null - np.median(null))) if len(null) > 10 else np.nan
+
+        # Per-sector depth consistency, each sector with its own empirical noise.
+        def robust_sigma(x):
+            x = x[np.isfinite(x)]
+            return 1.4826 * np.median(np.abs(x - np.median(x))) if len(x) > 10 else np.nan
+
+        sec_d, sec_s = [], []
+        for sec in np.unique(c["sector"]):
+            ms = c["sector"] == sec
+            if np.sum(intr & ms) < 3:
+                continue
+            sec_d.append(box_depth(intr & ms))
+            sec_s.append(robust_sigma(np.array([
+                box_depth(ms & (np.abs(((t - t0 - o + 0.5 * P) % P) - 0.5 * P) < dur / 2)) for o in offsets])))
+        sec_d, sec_s = np.array(sec_d), np.array(sec_s)
+        ok = np.isfinite(sec_d) & np.isfinite(sec_s) & (sec_s > 0)
+        if ok.sum() >= 3:
+            w_s = 1 / sec_s[ok] ** 2
+            mean_d = np.sum(sec_d[ok] * w_s) / w_s.sum()
+            chi2 = np.sum(((sec_d[ok] - mean_d) / sec_s[ok]) ** 2)
+            sector_p = float(chi2_dist.sf(chi2, ok.sum() - 1))
+        else:
+            sector_p = np.nan
+
+        # Broad depression: flux 1-3 durations either side of transit also dragged down
+        wings = (np.abs(phase) > dur) & (np.abs(phase) < 3 * dur)
+        wing_depth = box_depth(wings)
         rho = rec["rho_sun"]
         out.append({
             "tic": rec["tic"], "signal": s["signal"], "rho": rho,
@@ -97,6 +134,8 @@ def diagnostics_on(c, rec):
             "snr_all_events": snr_all,
             "snr_without_top2": snr_wo,
             "sigma_emp_ppm": float(sigma_emp * 1e6),
+            "sector_consistency_p": sector_p,
+            "wing_depth_ppm": float(wing_depth * 1e6),
             "snr_emp": float(s["depth_ppm"] / (sigma_emp * 1e6)) if sigma_emp > 0 else np.nan,
             "n_events": int(per_event.size),
             "depth_secondary_ppm": float(st["depth_phased"][0] * 1e6),
@@ -130,10 +169,17 @@ def main():
         diag = pd.DataFrame([d for ds in pool.map(diagnostics, todo) for d in ds])
     sig = sig.merge(diag, on=["tic", "signal"], how="left")
 
+    # Systematics show up as periods shared across stars. Two measures:
+    #  - exact: other stars within 0.1% in period (chance expectation ~0.4 for ~750 signals)
+    #  - crowding: other stars' signals within +-3% vs the median density over log period
     passing = sig[sig["passes"]]
-    period_counts = [int(sum(same_period(p, q) for q, t2 in zip(passing["period"], passing["tic"]) if t2 != t))
-                     for p, t in zip(sig["period"], sig["tic"])]
-    sig["n_other_stars_same_period"] = period_counts
+    pp, pt = passing["period"].to_numpy(), passing["tic"].to_numpy()
+    sig["n_other_stars_same_period"] = [int(np.sum((np.abs(pp / p - 1) < 0.001) & (pt != t)))
+                                        for p, t in zip(sig["period"], sig["tic"])]
+    local = np.array([np.sum((np.abs(np.log(pp / p)) < 0.03) & (pt != t)) for p, t in zip(sig["period"], sig["tic"])])
+    grid = np.geomspace(L.PERIOD_MIN_D, L.PERIOD_MAX_D, 200)
+    typical = np.median([np.sum(np.abs(np.log(pp / g)) < 0.03) for g in grid])
+    sig["period_crowding"] = local / max(typical, 1)
 
     def flags(s):
         f = []
@@ -159,27 +205,38 @@ def main():
                 f.append("secondary_eclipse")
             if s["snr_emp"] < L.SNR_THRESHOLD:
                 f.append("low_snr_red_noise")
+        if s.get("sector_consistency_p", 1) < 1e-4:  # 1e-3 flagged 2/20 injected planets, 1e-4 only 1 (on a glitch)
+            f.append("inconsistent_sectors")
+        if s.get("wing_depth_ppm", 0) > 0.4 * s["depth_ppm"]:
+            f.append("broad_depression")
         if s["depth_ppm"] > 30000 or s["rp_earth"] > 25:
             f.append("too_deep")
         if s["n_transits"] < L.MIN_TRANSITS:
             f.append("few_transits")
-        if s["n_other_stars_same_period"] >= 2:
+        if s["n_other_stars_same_period"] >= 3:
             f.append("common_period")
+        if s["period_crowding"] > 3:
+            f.append("crowded_period")
         return ";".join(f)
 
     sig["flags"] = [flags(s) for _, s in sig.iterrows()]
+    split = [fl.split(";") if fl else [] for fl in sig["flags"]]
+    sig["hard_flags"] = [";".join(x for x in fl if x not in SOFT_FLAGS) for fl in split]
+    sig["soft_flags"] = [";".join(x for x in fl if x in SOFT_FLAGS) for fl in split]
     sig["clean"] = sig["passes"] & (sig["flags"] == "")
-    sig = sig.sort_values(["clean", "passes", "sde"], ascending=False)
+    sig["survivor"] = sig["passes"] & (sig["hard_flags"] == "")
+    sig = sig.sort_values(["survivor", "clean", "sde"], ascending=False)
     sig.to_csv(OUT / "triage.csv", index=False)
 
     p = sig[sig["passes"]]
-    print(f"{len(recs)} stars searched; {len(p)} signals pass thresholds; {int(p['clean'].sum())} have no red flags")
+    print(f"{len(recs)} stars searched; {len(p)} signals pass thresholds; "
+          f"{int(p['survivor'].sum())} have no hard flags; {int(p['clean'].sum())} have no flags at all")
     print("\nred-flag counts among passing signals:")
     print(pd.Series([x for fl in p["flags"] for x in fl.split(";") if x]).value_counts().to_string())
     cols = ["tic", "signal", "period", "depth_ppm", "duration_hr", "dur_ratio", "rp_earth", "snr", "sde",
             "n_transits", "snr_emp", "snr_without_top2"]
-    print("\nclean signals:")
-    print(sig[sig["clean"]][cols].head(30).round(3).to_string(index=False))
+    print("\nsignals with no hard flags (soft flags shown):")
+    print(sig[sig["survivor"]][cols + ["soft_flags"]].head(40).round(3).to_string(index=False))
 
 
 if __name__ == "__main__":
