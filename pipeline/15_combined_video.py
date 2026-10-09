@@ -359,7 +359,7 @@ def render(fig, t):
         text(ax, W / 2, H - 70, "How we found them", 42, ramp(t, 7, 7.6) * out, weight="bold", ha="center")
         steps = [("526", "nearby stars, never in\nTESS's sharpest mode"), ("5 years", "of NASA TESS images,\nup to 44 sectors per star"),
                  ("~1 million", "possible orbits\ntested per star"), ("743", "repeating dips\nfound"),
-                 ("31", "pass all major\nred-flag tests"), ("2", "stronger than\nchance allows")]
+                 ("31", "pass all major\nred-flag tests"), ("2", "stronger than any\nclean fake signal")]
         bw, gap, x = 262, 48, 70
         for j, (big, small) in enumerate(steps):
             al = ramp(t, 7.6 + 0.55 * j, 8.1 + 0.55 * j) * out
