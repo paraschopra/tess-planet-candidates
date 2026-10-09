@@ -20,6 +20,7 @@ Nicknames are informal, not IAU names.
 - **Research note draft** (RNAAS): [`docs/rnaas/note.pdf`](docs/rnaas/note.pdf)
 - **Preregistered transit predictions** for TESS sectors 121, 122 and 129 (2027–28): [Zenodo, doi:10.5281/zenodo.23257784](https://doi.org/10.5281/zenodo.23257784)
 - **Draft community-candidate (CTOI) parameters:** [`docs/CTOI_DRAFT.md`](docs/CTOI_DRAFT.md)
+- **Next steps and the 2027 prediction test:** [`docs/next_steps.md`](docs/next_steps.md)
 
 ## How it was done
 | Step | Script | What it does |

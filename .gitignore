@@ -9,6 +9,7 @@ data/catalogs/_chunks_*/
 data/catalogs/tce/
 data/lightcurves/
 data/pixels/
+docs/outreach_private.md
 docs/rnaas/*.aux
 docs/rnaas/*.bbl
 docs/rnaas/*.blg
