@@ -37,7 +37,7 @@ The Reddit poster's star was never on the 2-minute shortlist. It only existed in
 
 ### Who has already searched the data
 NASA and MIT run automated programs that scan light curves for repeating dips:
-- **SPOC** (Science Processing Operations Center) is NASA's main pipeline. It searches the 2-minute stars carefully and also produces light curves from full-frame images for many brighter stars (called **TESS-SPOC** light curves).
+- **SPOC** (Science Processing Operations Center) is NASA's main pipeline. It searches the 2-minute stars carefully. It also produces light curves from full-frame images for many brighter stars (called **TESS-SPOC** light curves), and since 2021 (sector 36) it has searched those too, including multi-sector searches from sector 56. (An earlier version of this guide wrongly said FFI stars were never searched by SPOC; the independent Codex review corrected this.)
 - **QLP** (Quick-Look Pipeline, MIT) searches full-frame-image stars, but with stricter cut-offs, so faint signals can slip through.
 
 When these programs flag a signal it becomes a **TCE** (Threshold Crossing Event, an automatic alert). If humans think it is promising it becomes a **TOI** (TESS Object of Interest, an official candidate). Amateurs and other teams can submit **CTOIs** (Community TOIs). A candidate becomes a confirmed planet only after other telescopes follow it up.
@@ -288,18 +288,20 @@ A second check scrambled each candidate's own light curve:
 - slide each sector by a random amount;
 - search again, 38 times.
 
-The best fake signals reached SDE 8.5 and 9.3, against the real 11.3 and 10.3. Extrapolating, about 0.01 (370612437) and 0.2 (252721481) false alarms this strong are expected across the whole survey. These figures are uncertain by roughly 10×.
+The best fake signals reached SDE 8.5 and 9.3, against the real 11.3 and 10.3.
+
+**No calibrated false-alarm probability.** An earlier draft extrapolated these 38 scrambles to about 0.01 and 0.2 expected false alarms per survey. The second independent review rejected that: 38 samples can't support a tail extrapolation. Even zero fakes in 526 flipped stars only caps the rate at about 3 per survey (95%). On top of that, the selection rules were partly designed after looking at real signals, and the clipping is asymmetric, so flipping isn't a perfect null. The honest statement: **in one upside-down survey through the identical pipeline, no flag-free fake reached either candidate's SDE.** The 7–8 figures are local depth-to-noise ratios, not discovery probabilities.
 
 ### The tests and what they found
 
 | Test (plain language) | TIC 370612437 (P = 3.565 d) | TIC 252721481 (P = 4.934 d) |
 |---|---|---|
-| **Already known?** TOI, CTOI, ExoFOP, SIMBAD literature, and all 341,351 NASA automatic alerts (TCEs) | Nothing. None of our 526 stars has ever had a NASA alert, because NASA's automatic search only covers 2-minute targets. | Nothing. The star (HIP 114417) is on NASA's Habitable Worlds Observatory target lists, but no planet has been reported. |
+| **Already known?** TOI, CTOI, ExoFOP, SIMBAD literature, and all 341,351 NASA automatic alerts (TCEs) | Nothing. Neither star is in the 341,351 two-minute TCEs, nor in the TESS-SPOC FFI search (DV) manifests for the relevant sectors (checked by the Codex review). | Nothing. The star (HIP 114417) is on NASA's Habitable Worlds Observatory target lists, but no planet has been reported. |
 | **Hidden companion star?** Gaia wobble (RUWE) and binary flags; Hipparcos-to-Gaia motion change | None seen (RUWE 0.89). | None seen (RUWE 1.03; no change in motion between 1991 and 2016). |
-| **Physical model fit:** a realistic transit shape, with 30-min exposures smoothed and correlated noise included | 1.04 ± 0.15 Earth radii, tilted orbit (b ≈ 0.73), 1.4 h duration. The shape alone implies a star density matching the catalog K dwarf. | 1.10 ± 0.14 Earth radii, b ≈ 0.68, 1.6 h duration. Density also consistent. |
-| **Second pipeline:** the same dip in MIT's independently processed QLP light curves? | Yes: 225 ± 29 ppm vs NASA's 208 ± 25. QLP's individual sectors scatter more than their error bars (p = 0.004). | Yes: 238 ± 52 ppm vs 263 ± 32. |
-| **Hide-a-season prediction:** search the other seasons blind, predict the hidden season's transit times, look only there | 3 of 4 seasons confirmed: the dip appears exactly at the predicted time (3.0–5.2σ), deeper than anywhere else in the orbit. **2022 fails** (40 ± 42 ppm). | 3 of 4 confirmed (2.8–4.6σ, the deepest point in the orbit). Hiding 2019 leaves too little data for the blind search to find the period at all. |
-| **Which star is dimming?** Difference images of the raw pixels | Dimming detected near the target in 8/8 sectors, but too weakly to locate. 471 Gaia stars lie within 150"; three faint ones within 12" would need only 3–5% eclipses. | Dimming detected in 5/5 sectors, location unconstrained. NASA's own centroid data shows a small consistent shift (3.5σ), which hints at a source about one pixel away. |
+| **Physical model fit:** a realistic transit shape, with 30-min exposures smoothed and correlated noise included | 1.04 ± 0.15 Earth radii, tilted orbit (b ≈ 0.73), 1.4 h duration. The shape alone gives a weakly constrained star density, not inconsistent with the catalog K dwarf. | 1.10 ± 0.14 Earth radii, b ≈ 0.68, 1.6 h duration. Density also not inconsistent (weakly constrained). |
+| **Second reduction:** the same dip in MIT's QLP light curves (same images, different processing)? | Yes: 225 ± 35 ppm vs NASA's 208 ± 29. QLP's individual sectors scatter more than their error bars (p = 0.004). | Weakly: 238 ± 71 ppm vs 263 ± 34. |
+| **Hide-a-season check (retrospective):** search the other seasons, predict the hidden season's transit times, look only there | 3 of 4 seasons support it (3.0–5.2σ at the predicted time). **2022 fails** (40 ± 42 ppm). | 3 of 4 support it (2.8–4.6σ; in one season, 0.7% of the orbit shows a deeper dip). Hiding 2019 leaves too little data to find the period at all. These are retrospective: the candidates were selected using all seasons, so only future TESS data are a truly blind test. |
+| **Which star is dimming?** Difference images of the raw pixels | Dimming detected near the target in 8/8 sectors, but too weakly to locate. 471 Gaia stars lie within 150"; three faint ones within 12" would need only 3–5% eclipses. | Positive target-position amplitude in 5/5 sectors, location unconstrained; the pixel statistic is not well calibrated (2 of 40 off-transit control phases score higher). An apparent centroid shift seen in detector coordinates disappears once spacecraft rotation is accounted for: no significant sky shift. |
 | **Instrument glitches?** Momentum dumps, data gaps, shared periods in other stars | Only 3 of 51 transits are near a dump or gap. Stacking 88 other stars at this period gives nothing. | 95% of individual transits dip. Nothing in other stars. |
 | **Period aliases?** Twice or half the period, odd/even, phase 0.5 | P strongly preferred over P/2. No secondary eclipse. Odd/even differ by 1.4σ. | No secondary eclipse. Odd/even differ by 2.0σ. |
 
@@ -326,11 +328,23 @@ We asked Codex (OpenAI) and a fresh Claude agent to break the analysis, read-onl
 - **The first upside-down test** searched for only one signal and skipped triage. It was redone with the full pipeline.
 - **Confirmed correct:** the orbital physics, density units, image orientation, binning and the exposure smoothing.
 
+**Second review round (Codex, `results/review/REVIEW_CODEX.md`; response in `results/review/RESPONSE_TO_CODEX.md`):**
+- **False-alarm numbers withdrawn.** The 0.01/0.2 figures were unsupported.
+- **The centroid "shift" for HIP 114417 is not real in sky coordinates.**
+- **The pixel Δχ² p-values aren't calibrated.**
+- **QLP errors updated** to matched processing: 225 ± 35 and 238 ± 71 ppm.
+- **"Never searched by SPOC" was false.** SPOC has searched FFI light curves since 2021; neither star was flagged.
+- **The predicted UTC times were off by up to 6.5 minutes.** Fixed to proper geocentric UTC.
+- **Hold-out checks are retrospective,** and are now described that way.
+- **Density agreement is weak,** and is described that way.
+
+We independently re-ran the reviewer's centroid and timing checks and reproduced them exactly.
+
 ### Verdict
 | | TIC 370612437 | TIC 252721481 |
 |---|---|---|
-| Is the dip real (not noise)? | Very likely: survey false-alarm expectation about 0.01 | Likely: about 0.2 |
-| Is it on this star? | **Unknown.** Very crowded field, so a faint background eclipsing pair can't be excluded | **Unknown**, with a mild hint of an off-target source |
+| Is the dip real (not noise)? | Probably: local SNR ~7, seen with independent detrending and in QLP, no clean flipped fake as strong. No calibrated false-alarm probability. | Probably: local SNR ~7.7, but QLP support is weak (3.3σ). No calibrated false-alarm probability. |
+| Is it on this star? | **Unknown.** Very crowded field, so a faint background eclipsing pair can't be excluded | **Unknown.** No significant centroid shift, but the pixels can't localise the source |
 | Status | Weak candidate, needs more data | Weak candidate, needs more data |
 
 ### Statistical validation (TRICERATOPS): attempted, not completed

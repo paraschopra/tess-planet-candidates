@@ -53,7 +53,8 @@ def qlp_lightcurve(tic):
     return {k: v[o] for k, v in a.items()}, used
 
 
-def measure(c, P, t0, dur):
+def measure(c, raw, P, t0, dur):
+    """Per-sector depths (quick empirical errors) and the total with matched-processing errors."""
     rows = {}
     for s in np.unique(c["sector"]):
         m = c["sector"] == s
@@ -61,7 +62,9 @@ def measure(c, P, t0, dur):
             continue
         d, e = V.depth_emp(c, P, t0, dur, sel=m)
         rows[int(s)] = (d * 1e6, e * 1e6)
-    d, e = V.depth_emp(c, P, t0, dur)
+    # total: every control box processed like the transit box (as in 07_fit; the Codex review found the
+    # products comparison still used the quicker, slightly optimistic depth_emp)
+    d, e, _ = V.depth_emp_matched(raw, P, t0, dur)
     return rows, (d * 1e6, e * 1e6)
 
 
@@ -79,7 +82,7 @@ def run(tic):
                for k, v in raw.items()}
         c = V.masked_clean(raw, P, t0, dur)
         cleaned[name] = c
-        per, tot = measure(c, P, t0, dur)
+        per, tot = measure(c, raw, P, t0, dur)
         d = np.array([v[0] for v in per.values()])
         e = np.array([v[1] for v in per.values()])
         mean = np.sum(d / e ** 2) / np.sum(1 / e ** 2)

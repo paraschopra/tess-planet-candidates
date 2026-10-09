@@ -1,0 +1,44 @@
+{
+  "370612437": {
+    "n": 22,
+    "max_BJD_resid_seconds": 4.29428368806839,
+    "labelled_UTC_minus_geocentric_UTC_min": [
+      -3.788841226462125,
+      5.125982114057521
+    ],
+    "first_row": {
+      "sector": 121,
+      "sector_dates": "official",
+      "epoch": 814,
+      "mid_BJD_TDB": 2461643.9868,
+      "mid_UTC": "2027-08-26 11:40",
+      "sigma_min": 28.4,
+      "window_start_UTC": "2027-08-26 09:32",
+      "window_end_UTC": "2027-08-26 13:49",
+      "depth_ppm": 210,
+      "duration_hr": 1.44
+    },
+    "correct_geocentric_UTC_first": "2027-08-26 11:36:05.374"
+  },
+  "252721481": {
+    "n": 11,
+    "max_BJD_resid_seconds": 4.017157852649689,
+    "labelled_UTC_minus_geocentric_UTC_min": [
+      -5.18086192350669,
+      6.510605766010116
+    ],
+    "first_row": {
+      "sector": 122,
+      "sector_dates": "estimated",
+      "epoch": 594,
+      "mid_BJD_TDB": 2461671.1802,
+      "mid_UTC": "2027-09-22 16:19",
+      "sigma_min": 19.7,
+      "window_start_UTC": "2027-09-22 14:32",
+      "window_end_UTC": "2027-09-22 18:06",
+      "depth_ppm": 279,
+      "duration_hr": 1.59
+    },
+    "correct_geocentric_UTC_first": "2027-09-22 16:13:11.518"
+  }
+}

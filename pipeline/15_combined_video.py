@@ -357,21 +357,21 @@ def render(fig, t):
         draw_sky(ax, 17, dim=0.15, target_alpha=0)
         out = 1 - ramp(t, 16.4, 17)
         text(ax, W / 2, H - 70, "How we found them", 42, ramp(t, 7, 7.6) * out, weight="bold", ha="center")
-        steps = [("526", "nearby stars, never in\nTESS's sharpest mode"), ("5 years", "of NASA TESS images,\nup to 44 sectors per star"),
+        steps = [("526", "nearby stars with\nno 2-minute data"), ("5 years", "of NASA TESS images,\nup to 44 sectors per star"),
                  ("~1 million", "possible orbits\ntested per star"), ("743", "repeating dips\nfound"),
-                 ("31", "pass every\nred-flag test"), ("2", "stronger than\nchance allows")]
+                 ("31", "pass all major\nred-flag tests"), ("2", "stronger than any\nclean fake signal")]
         bw, gap, x = 262, 48, 70
         for j, (big, small) in enumerate(steps):
             al = ramp(t, 7.6 + 0.55 * j, 8.1 + 0.55 * j) * out
             box(ax, x + j * (bw + gap), 690, bw, 170, al, big, small, edge=RED if j == 5 else ACCENT)
             if j:
                 arrow(ax, x + j * (bw + gap) - gap + 6, x + j * (bw + gap) - 6, 775, al)
-        groups = [(70, "Are they new?", ["0 of 341,351 NASA automatic planet alerts", "no TOI or community candidate on ExoFOP",
+        groups = [(70, "Are they new?", ["not among 341,351 NASA automatic planet alerts", "no TOI or community candidate on ExoFOP",
                                           "no planet papers on either star (SIMBAD)"]),
-                  (W / 2 + 10, "Are they real?", ["signal strength 7.2σ (#1) and 7.7σ (#2), red-noise aware",
-                                                   "same dip in NASA's and MIT's independent data",
-                                                   "hid a season, predicted it blind: 3 of 4 hits",
-                                                   "in 526 upside-down light curves, chance never got this strong"])]
+                  (W / 2 + 10, "How solid are they?", ["local signal-to-noise about 7–8 (not a discovery probability)",
+                                                   "same dip in NASA's and MIT's separate processing",
+                                                   "season-by-season checks: 3 of 4 support each",
+                                                   "526 flipped light curves (fakes only): no clean fake this strong"])]
         for g, (x0, head, items) in enumerate(groups):
             al = ramp(t, 11.3 + 1.6 * g, 11.9 + 1.6 * g) * out
             ax.add_patch(plt.Rectangle((x0, 170), W / 2 - 80, 440, color="#121827", alpha=0.85 * al, zorder=10))

@@ -20,18 +20,20 @@ Both signals come from TESS-SPOC full-frame-image light curves (PDCSAP, which is
 | Planet radius (R⊕) | 1.04 ± 0.15 |
 | Equilibrium temperature (K) | ~850 (zero albedo) |
 | Insolation (S⊕) | ~87 |
-| SNR | 7.2 (empirical red-noise error, transit-masked detrending); BLS SDE 11.3 |
+| SNR | ~7.2 local depth/error (empirical red-noise error; not a discovery probability); BLS SDE 11.3 |
 | Sectors | 16, 17, 56, 57, 76, 77, 83, 84 (51 transits) |
 
 **Notes (draft):**
-> Small transit-like signal found in a multi-sector BLS search of TESS-SPOC FFI light curves of 526 nearby (<60 pc) FFI-only K/M dwarfs.
+> Small transit-like signal found in a multi-sector BLS search of TESS-SPOC FFI light curves of 526 nearby (<60 pc) dwarf stars never observed at 2-minute cadence.
 >
-> - **Recovered independently:** the same signal appears in QLP (225±29 ppm). Blind leave-one-season-out predictions recover it in 3 of 4 seasons; the 2022 season (S56–57) is weaker.
-> - **Clean diagnostics:** no odd/even difference (1.4σ), no secondary eclipse, no centroid shift detected. The transit-shape stellar density agrees with the TIC.
-> - **Survey-wide false alarms:** about 0.01 expected from scrambled and inverted light curves.
-> - **Main caveat:** this is a crowded galactic-plane field (b = −1.3°). Difference imaging detects the dimming near the target (8/8 sectors) but cannot localise it. Several Gaia neighbours within 12–22" (T ≈ 15–18) could produce the signal with 3–30% eclipses.
+> - **Seen in a second reduction of the same exposures:** QLP shows 225±35 ppm.
+> - **Retrospective season checks:** leave-one-season-out tests support it in 3 of 4 seasons. The 2022 season (S56–57) is weaker (≈105±45 ppm) and its hold-out test fails.
+> - **Clean diagnostics:** odd/even depths agree (1.4–1.6σ), no secondary eclipse, no significant centroid shift. The weakly constrained transit-shape density is not inconsistent with the TIC.
+> - **Survey-wide false alarms:** not reliably calibrated. In one inverted (upside-down) 526-star survey through the same pipeline, no flag-free signal reached this SDE (max 8.4).
+> - **Main caveat:** this is a crowded galactic-plane field (b = −1.3°). Target-position difference-image amplitudes are positive in all 8 sectors, but the source is not localised. Several Gaia neighbours within 12–22" (T ≈ 15–18) could produce the signal with 3–30% eclipses.
 > - **TRICERATOPS:** not completed. Needed once ground-based follow-up exists.
 > - **Follow-up needed:** seeing-limited photometry to clear neighbours, and high-resolution imaging.
+> - **Not in checked alert products:** no SPOC TCE in the 2-minute TCE lists, and no TESS-SPOC FFI DV report in the S56, S57, S76, S77, S83, S84 and S56–S69 manifests.
 > - **Next TESS coverage:** S121, S122, S129. Predicted transit times are in the repository.
 
 ## TIC 252721481.01
@@ -48,19 +50,20 @@ Both signals come from TESS-SPOC full-frame-image light curves (PDCSAP, which is
 | Planet radius (R⊕) | 1.10 ± 0.14 |
 | Equilibrium temperature (K) | ~716 (zero albedo) |
 | Insolation (S⊕) | ~44 |
-| SNR | 7.7 (empirical red-noise error); BLS SDE 10.3 |
+| SNR | ~7.7 local depth/error (empirical red-noise error; not a discovery probability); BLS SDE 10.3 |
 | Sectors | 16, 17, 57, 77, 84 (19 transits) |
 
 **Notes (draft):**
 > Small transit-like signal in TESS-SPOC FFI light curves (same survey as TIC 370612437.01).
 >
-> - **Recovered independently:** the same signal appears in QLP (238±52 ppm).
-> - **Blind hold-out predictions:** recover it in 3 of 4 seasons. Withholding 2019 leaves too little data to recover the period blind.
+> - **Seen in a second reduction of the same exposures:** QLP shows 238±71 ppm (weak).
+> - **Retrospective season checks:** leave-one-season-out tests support it in 3 of 4 seasons. Withholding 2019 leaves too little data to recover the period.
 > - **Clean diagnostics:** no secondary eclipse; odd/even differ by 2.0σ. Gaia RUWE is 1.03, and the Hipparcos–Gaia proper-motion anomaly shows no companion (HGCA χ² = 0.35).
-> - **Survey-wide false alarms:** about 0.2 expected.
-> - **Main caveat:** SPOC flux-weighted centroids show a small consistent in-transit shift (−0.28 ± 0.08 millipixel, about 3.5σ), and difference-imaging localisation is inconclusive. A blended source about 1 pixel away is possible.
+> - **Survey-wide false alarms:** not reliably calibrated. No flag-free signal in one inverted 526-star survey reached this SDE.
+> - **Main caveat:** detector-row centroid shifts were noted, but a check that accounts for spacecraft rotation finds no significant common sky displacement. Pixel localisation is inconclusive, so a blend remains possible.
 > - **TRICERATOPS:** not completed.
 > - **Follow-up needed:** neighbour clearing and high-resolution imaging.
+> - **Not in checked alert products:** no SPOC TCE in the 2-minute TCE lists, and no TESS-SPOC FFI DV report in the S56, S57, S76, S77, S83, S84 and S56–S69 manifests.
 > - **Next TESS coverage:** S122, S129. Predicted transit times are in the repository.
 
 ---
