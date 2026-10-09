@@ -265,9 +265,23 @@ The search tried about a million orbits per star on 526 stars, about 1,500 searc
 
 A real planet only makes dips, so anything found in flipped data is noise, star spots or instrument behaviour, by construction.
 
-**Partial result; the full 526-star run is still in progress.** Over the first 416 flipped stars, put through the full triage (by the independent auditor), not one flag-free signal reached SDE 10. The highest was 8.45.
+| | Real data | Upside-down data (all fake by construction) |
+|---|---|---|
+| Signals passing the search | 743 | 752 |
+| No hard red flags | 31 | 39 |
+| No flags at all | 10 | 17 |
+| Strongest flag-free signal | **SDE 11.3 and 10.3** (our two) | SDE 8.4 |
+
+Chance produces as *many* clean-looking signals as the real data, but never one as *strong*: across all 526 flipped stars, no flag-free fake reached SDE 9.
 
 The other 8 flag-free signals have SDE 7.0–8.1, inside the range the flipped data produce, so we can't tell them apart from chance. The two leaders, at SDE 11.3 and 10.3, stand above anything the flipped survey produced once triage is applied.
+
+**One more signal checked, then set aside (watch list): HIP 93326 (TIC 350883383), 14.93 days.** The flipped test showed three real signals with SDE ≥ 10 that carried only soft flags. Two have dips only 2.8–3.2× the realistic noise, which is stellar wobble. The third looked good: a box-shaped 245 ppm dip, matching alternate dips, no secondary eclipse, consistent sectors, and SDE 10.7. So it got the full Phase 3 treatment, and it did not hold up:
+- the dimming is **not detected in the pixels** (p = 0.35);
+- with only 8 transits, the hide-a-season predictions mostly failed (one 2.7σ hit, one season too weak to search, one prediction 3 hours off);
+- its period sits in the pile-up of artifacts near TESS's 13.7-day orbit.
+
+It stays on a watch list for the next TESS data. Rejecting it is the tests doing their job.
 
 A second check scrambled each candidate's own light curve:
 - mask out the transits;
@@ -319,6 +333,17 @@ We asked Codex (OpenAI) and a fresh Claude agent to break the analysis, read-onl
 | Is it on this star? | **Unknown.** Very crowded field, so a faint background eclipsing pair can't be excluded | **Unknown**, with a mild hint of an off-target source |
 | Status | Weak candidate, needs more data | Weak candidate, needs more data |
 
+### Statistical validation (TRICERATOPS): attempted, not completed
+TRICERATOPS (Giacalone et al. 2021) is the standard tool for weighing "planet on the target" against every blend scenario. Our run never completed, for reasons unrelated to the data:
+- it pins old numpy/scipy versions (now isolated in `.venv-tri`, `requirements-triceratops.txt`);
+- the TRILEGAL server it calls serves an incomplete certificate chain (fixed with `cache/certs/bundle.pem`);
+- MAST dropped and then stalled its large image downloads during a network change.
+
+It isn't needed for a CTOI, and without high-resolution imaging it couldn't validate these candidates anyway. The follow-up team will run it once ground-based data exist. `pipeline/12_triceratops.py` is ready to rerun.
+
+### Predicted transits for the next TESS visits
+TESS observes TIC 370612437 again in sectors 121, 122 and 129 (from 2027-08-23), and HIP 114417 in sectors 122 and 129. `pipeline/13_predictions.py` lists every predicted transit with its uncertainty (±28 and ±20 minutes, 1σ) in `results/phase3/*_predicted_transits.csv`. The dates of sectors 122 and 129 are estimates until the official schedule is published. Publishing these before the data arrive turns the next sectors into a clean, pre-announced test.
+
 ### What would settle it
 1. **Ground-based telescopes with sharper vision** (pixels about 1" rather than 21"). They can't see a 0.02% dip, but they can easily check whether any nearby faint star has a deep eclipse at the predicted times. This is the standard "neighbour clearing" step that TESS follow-up teams (TFOP) do for every candidate.
 2. **Statistical validation (TRICERATOPS)**, which weighs the planet scenario against every blend scenario using the real neighbours.
@@ -368,3 +393,13 @@ Sources: IAU NameExoWorlds rules (https://nameexoworlds.iau.org/2022naming-rules
 - its distance (158 light-years).
 
 Make one for any candidate with `python pipeline/11_animation.py <TIC> "<nickname>"`.
+
+`media/candidates.mp4` is a 66-second combined video (`pipeline/15_combined_video.py`):
+1. the night sky from Earth, turning towards Cygnus;
+2. a 3D flight from the Sun to TIC 370612437 through 32,434 real stars at their Gaia distances;
+3. the star resolving into its disk;
+4. the transit with the real stacked data;
+5. both candidates on an all-sky map, with info cards;
+6. what happens next.
+
+The music is an original score synthesised in code (`pipeline/14_score.py`): ambient pads, a swell during the flight, and a low pulse as each planet crosses.

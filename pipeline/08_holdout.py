@@ -15,7 +15,7 @@ Everything uses the phase 2 search cleaning (no transit mask), so no knowledge o
 ephemeris leaks into the hidden season.
 
 Writes results/phase3/<TIC>_holdout.json and results/phase3/plots/<TIC>_holdout.png.
-Usage: python pipeline/08_holdout.py [WORKERS]
+Usage: python pipeline/08_holdout.py [WORKERS] [TIC ...]
 """
 import json
 import sys
@@ -70,10 +70,13 @@ def fold(args):
     test = np.isin(c["sector"], hold)
     train = {k: v[~test] for k, v in c.items()}
     tst = {k: v[test] for k, v in c.items()}
-    signals, (periods, sde) = L.bls_search(train, rho_of(tic), max_signals=1)
-    s = signals[0]
+    # same iterative search as phase 2 (up to 3 signals); predict with the one matching the candidate,
+    # else with the strongest (which then tests nothing about the candidate)
+    signals, (periods, sde) = L.bls_search(train, rho_of(tic), max_signals=V.CANDIDATES.get(tic, 1))
+    hits = [x for x in signals if abs(x["period"] / P_full - 1) < 1e-3]
+    s = hits[0] if hits else signals[0]
     P, t0, dur = s["period"], s["t0"], s["duration_hr"] / 24
-    match = abs(P / P_full - 1) < 1e-3
+    match = bool(hits)
     # SDE of the candidate period in the training periodogram, whatever won
     near = np.abs(periods / P_full - 1) < 2e-4
     sde_at_true = float(np.nanmax(sde[near])) if near.any() else np.nan
@@ -89,6 +92,7 @@ def fold(args):
     return {"tic": tic, "held_out": [int(x) for x in hold],
             "held_out_dates": V.btjd_to_date(tst["time"].min()) + " to " + V.btjd_to_date(tst["time"].max()),
             "train_best_period": P, "train_best_sde": s["sde"], "train_best_snr": s["snr"],
+            "train_signal_number": int(s["signal"]),
             "recovers_period": bool(match), "train_sde_at_candidate_period": sde_at_true,
             "prediction_drift_vs_full_hr": float((pred_mid - full_mid) * 24),
             "as_designed": predict(tst, P, t0, dur), "refined_width": predict(tst, P, t0_ref, dur_ref),
@@ -134,13 +138,14 @@ def strip(d):
 def main():
     workers = int(sys.argv[1]) if len(sys.argv) > 1 else 8
     (V.OUT / "plots").mkdir(parents=True, exist_ok=True)
+    tics = [int(a) for a in sys.argv[2:]] or list(V.CANDIDATES)
     jobs = []
-    for tic in V.CANDIDATES:
+    for tic in tics:
         lc, _, _ = L.reject_bad_sectors(L.load_star(tic))
         jobs += [(tic, g) for g in V.seasons(lc)]
     with Pool(workers) as pool:
         res = pool.map(fold, jobs)
-    for tic in V.CANDIDATES:
+    for tic in tics:
         folds = [r for r in res if r["tic"] == tic]
         plot(tic, folds)
         (V.OUT / f"{tic}_holdout.json").write_text(json.dumps([strip(f) for f in folds], indent=1))

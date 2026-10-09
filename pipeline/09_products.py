@@ -11,10 +11,11 @@ Caveat: TESS-SPOC PDCSAP removes neighbours' light (CROWDSAP); QLP's KSPSAP flux
 differently, so a modest depth offset between products is not by itself a problem.
 
 Writes results/phase3/<TIC>_products.json and results/phase3/plots/<TIC>_products.png.
-Usage: python pipeline/09_products.py
+Usage: python pipeline/09_products.py [TIC ...]
 """
 import importlib
 import json
+import sys
 
 import env  # noqa: F401
 
@@ -132,7 +133,7 @@ def plot(tic, P, t0, dur, cleaned, res):
 
 def main():
     (V.OUT / "plots").mkdir(parents=True, exist_ok=True)
-    for tic in V.CANDIDATES:
+    for tic in [int(a) for a in sys.argv[1:]] or list(V.CANDIDATES):
         r = run(tic)
         print(f"TIC {tic}  QLP products {r['qlp_products']}  rejected {r['qlp_rejected_sectors']}")
         for name in ("TESS-SPOC", "QLP"):

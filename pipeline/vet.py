@@ -15,15 +15,16 @@ from wotan import flatten
 import lcsearch as L
 from env import RESULTS
 
-CANDIDATES = [370612437, 252721481]
+# candidate TIC -> which search signal it is (350883383's first signal was a glitch at 23.8 d)
+CANDIDATES = {370612437: 1, 252721481: 1, 350883383: 2}
 OUT = RESULTS / "phase3"
 NULL_OFFSETS = np.concatenate([np.linspace(0.1, 0.4, 20), np.linspace(0.6, 0.9, 20)])
 
 
 def ephemeris(tic):
-    """Phase 2 search ephemeris (P, t0, duration in days) for a candidate's first signal."""
+    """Phase 2 search ephemeris (P, t0, duration in days) for a candidate's signal."""
     t = pd.read_csv(RESULTS / "phase2" / "triage.csv")
-    r = t[(t.tic == tic) & (t.signal == 1)].iloc[0]
+    r = t[(t.tic == tic) & (t.signal == CANDIDATES.get(tic, 1))].iloc[0]
     return float(r.period), float(r.t0), float(r.duration_hr) / 24
 
 
