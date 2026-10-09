@@ -306,7 +306,7 @@ def sky_map(fig, rect, t, a):
                 color="white", alpha=0.7 * a, lw=0)
     mw = D["mw_dir"][::6]
     mra = np.degrees(np.arctan2(mw[:, 1], mw[:, 0])) % 360
-    sky.scatter(-np.radians(((mra + 180) % 360) - 180), np.arcsin(mw[:, 2]), s=2, color="#7b8cff", alpha=0.06 * a, lw=0)
+    sky.scatter(-np.radians(((mra + 180) % 360) - 180), np.arcsin(mw[:, 2]), s=3, color="#7b8cff", alpha=0.14 * a, lw=0)
     for k, tic in enumerate((MAIN, SECOND)):
         i = D[tic]
         x0 = -np.radians(((i["ra"] + 180) % 360) - 180)
@@ -333,8 +333,6 @@ def render(fig, t):
         draw_sky(ax, 17, dim=0.18, target_alpha=0)
         a = 1 - ramp(t, 6.4, 7)
         text(ax, W / 2, H - 70, "Two new exoplanet candidates found", 50, a, weight="bold", ha="center")
-        text(ax, W / 2, H - 128, "in five years of NASA TESS data  ·  Earth-sized  ·  tentative, not yet confirmed", 21, a,
-             ACCENT, ha="center")
         sky_map(fig, [0.345, 0.50, 0.31, 0.28], t, a)
         cards = ((MAIN, f'#1  "{NICKS[MAIN]}"', f"TIC {MAIN}"), (SECOND, f'#2  "{NICKS[SECOND]}"', "HIP 114417  (TIC 252721481)"))
         for k, (tic, title, name) in enumerate(cards):
@@ -343,16 +341,17 @@ def render(fig, t):
             ax.add_patch(plt.Rectangle((x0 - 30, 50), W / 2 - 100, 440, color="#121827", alpha=0.88 * a, zorder=10))
             text(ax, x0, 448, title, 30, a, ACCENT, weight="bold")
             text(ax, x0, 398, name, 18, a, FG)
-            lines = [f"in {i['const']}, {i['dist'] * LY:.0f} light-years away",
+            # "constellation" spelled out: a direction on the sky, not a place (Andromeda is not the galaxy)
+            lines = [f"in the constellation {i['const']}",
+                     f"{i['dist'] * LY:.0f} light-years away, in our Milky Way",
                      f"about {i['rp']:.1f}× Earth's size",
                      f"orbits its star every {i['P']:.2f} days",
                      f"dims it by {i['depth'] / 1e4:.3f}% for {i['t14']:.1f} hours",
                      f"~{i['teq']:.0f} K: far too hot for life"]
             for j, ln in enumerate(lines):
-                text(ax, x0, 345 - j * 50, ln, 18, a, FG if j < 2 else DIM)
+                text(ax, x0, 348 - j * 46, ln, 18, a, FG if j < 3 else DIM)
             loop = (t / 4.0 + 0.5 - 0.12 * k) % 1.0  # a crossing every 4 s; both planets on their stars at frame one
             draw_disk(ax, x0 + 690, 250, 115, a, i, planet_t=-1.7 + 3.4 * loop, zoom=4, path=True, z=12)
-        text(ax, W / 2, 22, "found with Claude Code  ·  planets drawn 4× larger  ·  nicknames are informal", 12, a, DIM, ha="center")
         return
 
     if t < 17:  # how we found them
