@@ -379,15 +379,24 @@ No one can confirm a planet from TESS data alone, including NASA. A TESS dip pro
    - **A mass measurement** with precise radial velocities. A ~1 Earth-radius planet around an 11th-magnitude K dwarf would wobble its star by under 1 m/s, which is at the limit of the best instruments today. That is why validation is the usual route.
 
 ### Who to report to
-- **ExoFOP-TESS** (https://exofop.ipac.caltech.edu, run by NASA's Exoplanet Science Institute at Caltech) is where the TESS community coordinates.
-  1. Create a free account.
-  2. Submit each signal as a **CTOI** (Community TESS Object of Interest), named by its TIC number plus a suffix: **TIC 370612437.01** and **TIC 252721481.01**.
-  3. Include the period, epoch, depth, duration and size, and a note listing every caveat.
-- **The TESS TOI team at MIT** reviews CTOIs. If it meets their standards, it becomes an official **TOI** with a TOI number. That puts it on the target lists of the **TESS Follow-up Observing Program (TFOP)**, the network of professional and amateur observatories that do steps 1–3 above. Anyone can apply to join TFOP.
-- **TESS Director's Discretionary Time.** The Reddit poster asked for their star to get 2-minute observations in a future sector. That sharpens both the dip and the pixel test.
-- **Preregistration** (optional, as in the Reddit post): publish the predicted transit times for upcoming TESS sectors, for example on Zenodo, *before* the data arrive. That makes the next sector a clean prediction test.
+**Rule change (checked on ExoFOP on 2026-10-09):** since **19 August 2026**, ExoFOP only accepts community candidates that are **already published**. The options are:
+- a peer-reviewed journal with online access; or
+- a **Research Note of the AAS (RNAAS)**, provided the methods used to detect and vet the candidate were themselves published in a peer-reviewed journal and are cited.
 
-The people who submit a CTOI are credited as its identifiers. If the planet is later validated, they are normally invited onto the discovery paper.
+Uploading also needs prior approval, through the **Published Candidate Upload Request** form (https://exofop.ipac.caltech.edu/tess/candidate_help.php). An earlier version of this guide said to submit CTOIs directly; that is no longer possible.
+
+The path is therefore:
+1. **Preregister now (Zenodo, free).** Upload the predicted transit times and a short description. This gives a public, dated record and a DOI immediately, before any journal step. Social posts can link to it.
+2. **Publish a short note.**
+   - The quickest route is an **RNAAS** (about 1,000 words, one figure). It describes the two signals and cites the published methods we used: BLS, the wotan detrending, batman transit models, standard TESS vetting tests.
+   - Whether ExoFOP accepts our pipeline as "previously published methodology" is their call. If not, the route is a full paper, or a methods paper first.
+   - Working with a professional astronomer, for example through TFOP, would strengthen either route.
+3. **Request ExoFOP upload access,** then submit each signal as a **CTOI**, citing the paper: **TIC 370612437.01** and **TIC 252721481.01**. The values and caveats are ready in `docs/CTOI_DRAFT.md`.
+4. **The TESS TOI team at MIT** reviews CTOIs. If one meets their standards it becomes an official **TOI**, which puts it on the target lists of the **TESS Follow-up Observing Program (TFOP)**: the professional and amateur observatories that do the follow-up steps above.
+
+Two more things you can do:
+- **TESS Director's Discretionary Time.** The Reddit poster got 2-minute observations scheduled for a future sector. That sharpens both the dip and the pixel test, and doesn't depend on ExoFOP.
+- **Credit.** The people who identify a CTOI are credited, and are normally invited onto the first discovery paper if it is followed up. A published note plus a Zenodo record establishes that priority.
 
 ### Naming
 - **The scientific name is automatic:** the star's name plus a letter, starting at "b". If confirmed these would be **TOI-XXXX b** (once a TOI number is assigned), or **TIC 370612437 b** and **HIP 114417 b**.

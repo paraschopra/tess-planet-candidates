@@ -1,6 +1,8 @@
 # Draft CTOI submissions (not yet submitted)
 
-These are for submission by the project owner through an ExoFOP-TESS account (https://exofop.ipac.caltech.edu → log in → CTOI upload). Map the values below onto the form's fields. Times are BJD_TDB, depths are in ppm and durations are full transit durations (T14).
+> **Cannot be uploaded yet.** Since 2026-08-19, ExoFOP accepts community candidates only after they are published: in a peer-reviewed journal, or in an RNAAS that cites previously published detection and vetting methods. Upload access must first be approved via the Published Candidate Upload Request (https://exofop.ipac.caltech.edu/tess/candidate_help.php). Each upload needs the paper's URL. See `docs/GUIDE.md` Part 5. Everything below is ready for when that is done, and can also serve as the core of the RNAAS note.
+
+These are for submission by the project owner through an ExoFOP-TESS account. Map the values below onto the form's fields. Times are BJD_TDB, depths are in ppm and durations are full transit durations (T14).
 
 Both signals come from TESS-SPOC full-frame-image light curves (PDCSAP, which is already corrected for crowding) and were cross-checked with QLP. The search, vetting and audit code is in this repository. Results and figures are in `results/phase3/`, and the summary is in `docs/GUIDE.md` Parts 3–4.
 
@@ -69,6 +71,7 @@ Both signals come from TESS-SPOC full-frame-image light curves (PDCSAP, which is
 ---
 
 ### Before submitting
+- **Publish first** (RNAAS or journal) and get upload approval (see the note at the top). Include the paper URL in the upload.
 - Check that the ExoFOP CTOI form's fields and units match the values above, and that neither star has received a TOI or CTOI since 2026-10-09.
 - Decide on the **"user" and "group" credit**. The form records who identified the signal.
 - Optionally **preregister** first: publish `results/phase3/*_predicted_transits.csv` (for example on Zenodo, with a DOI) *before* sectors 121/122 are observed (from 2027-08-23). That makes those sectors an untouched test.
