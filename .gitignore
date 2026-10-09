@@ -9,6 +9,17 @@ data/catalogs/_chunks_*/
 data/catalogs/tce/
 data/lightcurves/
 data/pixels/
+docs/rnaas/*.aux
+docs/rnaas/*.bbl
+docs/rnaas/*.blg
+docs/rnaas/*.log
+docs/rnaas/*.out
+docs/rnaas/*.synctex.gz
+docs/rnaas/aasjournalv7.bst
+docs/rnaas/aastex701-sample.*
+docs/rnaas/aastex701*.cls
+docs/rnaas/orcid-ID.png
+docs/rnaas/texdeps/
 results/*.log
 results/debug/
 results/media/
@@ -20,3 +31,9 @@ results/phase3/*_triceratops_input.npz
 results/phase3/*.mp4
 results/phase3/audit_codex_raw.log
 results/phase3/inverted_1signal_old/
+results/review/scratch/codex/*.npy
+results/review/scratch/codex/ASTROPY_CACHE_DIR/
+results/review/scratch/codex/MPLCONFIGDIR/
+results/review/scratch/codex/NUMBA_CACHE_DIR/
+results/review/scratch/codex/XDG_*/
+screenshots/

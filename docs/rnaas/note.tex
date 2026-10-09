@@ -1,0 +1,76 @@
+%% RNAAS draft. Limits: abstract <= 150 words, body <= 1,000 words, one figure or table.
+\documentclass{aastex701}
+
+\shorttitle{Two Earth-sized TESS FFI planet candidates}
+\shortauthors{Chopra}
+
+\begin{document}
+
+\title{Two Earth-sized Transiting Planet Candidates around Nearby K Dwarfs from a Multi-sector Search of TESS Full-frame Images}
+
+%% TODO(author): add affiliation, ORCID and corresponding e-mail before submission.
+\author{Paras Chopra}
+\affiliation{Independent researcher}
+\email{paras@paraschopra.com}
+
+\begin{abstract}
+We report two transit-like signals from a multi-sector box least squares search of TESS full-frame-image light curves of 526 nearby ($<60$\,pc) dwarf stars never observed at 2-minute cadence. TIC~370612437.01 has $P=3.564921$\,d, a depth of $210$\,ppm and an implied radius of $1.04\pm0.15\,R_\oplus$. TIC~252721481.01 (HIP~114417) has $P=4.933533$\,d, a depth of $279$\,ppm and an implied radius of $1.10\pm0.14\,R_\oplus$. Both signals appear in the SPOC and QLP reductions, show no secondary eclipse or odd--even difference, and give local depth-to-noise ratios of about 7--8. Neither source is localized, so blended eclipsing binaries are not excluded. We provide ephemerides and preregistered transit predictions for the 2027--2028 TESS sectors.
+\end{abstract}
+
+\keywords{Exoplanet detection methods (489) --- Transit photometry (1709) --- Exoplanets (498)}
+
+\section{Search}
+We searched TESS \citep{Ricker2015} data for stars from the Gaia Catalogue of Nearby Stars \citep{GCNS2021} within 60\,pc, matched to the TESS Input Catalog v8.2 \citep{Stassun2019}. We kept stars with $R_\star\le1.5\,R_\odot$, $T\le13$ and contamination ratio $<0.2$, observed in at least three sectors spanning at least two years, never observed at 2-minute cadence, and not already a TOI, CTOI or confirmed-planet host. This left 526 stars.
+
+We used one light curve per sector: TESS-SPOC full-frame-image PDCSAP photometry \citep{Caldwell2020} where available, otherwise QLP \citep{Huang2020}. Each light curve was detrended with a 0.75\,d biweight filter \citep{Hippke2019}, chosen by injection--recovery tests. We then ran an iterative box least squares search \citep{Kovacs2002} over 0.5--25\,d with up to three signals per star. Signals with SDE\,$\ge7$, SNR\,$\ge6$ and at least three transits (743 in total) were triaged automatically. The flags tested odd--even depth differences, secondary eclipses, inconsistent depths between sectors, duration, the dominance of single events, edge effects, and periods shared across stars \citep[cf.][]{Twicken2018}, using noise measured from 40 off-transit phases. Flag thresholds were calibrated on injected planets.
+
+Thirty-one signals had no hard flags. The two reported here have the highest SDE (11.3 and 10.3). As an empirical null, we inverted all 526 light curves and repeated the identical search and triage \citep[cf.][]{Thompson2018}. No flag-free inverted signal exceeded SDE 8.4. This is a single null realization, so it does not give a calibrated false-alarm probability.
+
+\section{Candidates}
+\textbf{TIC~370612437.01} (TYC~3968-348-1; $T=9.80$, $T_{\rm eff}=4380$\,K, $R_\star=0.66\,R_\odot$, $d=48.4$\,pc):
+\begin{itemize}
+\item $P=3.564921^{+0.000022}_{-0.000018}$\,d and $T_0=2458742.1409\pm0.0069$\,BJD$_{\rm TDB}$, with 55 transit epochs covered in eight sectors (16, 17, 56, 57, 76, 77, 83, 84).
+\item A batman \citep{Kreidberg2015}/emcee \citep{ForemanMackey2013} fit gives depth $210^{+45}_{-49}$\,ppm, $T_{14}=1.44^{+0.28}_{-0.14}$\,h, $b=0.73^{+0.08}_{-0.18}$ and $R_p=1.04\pm0.15\,R_\oplus$. The fit integrates over exposures \citep{Kipping2010}, uses \citet{Claret2017} limb darkening, inflates the errors for red noise ($\beta=1.18$) and applies a TIC density prior.
+\item The equilibrium temperature is $T_{\rm eq}\approx850$\,K.
+\end{itemize}
+
+\textbf{TIC~252721481.01} (HIP~114417; $T=9.73$, $T_{\rm eff}=4301$\,K, $R_\star=0.61\,R_\odot$, $d=41.1$\,pc):
+\begin{itemize}
+\item $P=4.933533^{+0.000019}_{-0.000021}$\,d and $T_0=2458740.6616\pm0.0060$\,BJD$_{\rm TDB}$, with 21 transit epochs covered in five sectors (16, 17, 57, 77, 84).
+\item The fit gives depth $279^{+52}_{-48}$\,ppm, $T_{14}=1.59\pm0.15$\,h, $b=0.68^{+0.10}_{-0.14}$ and $R_p=1.10^{+0.14}_{-0.13}\,R_\oplus$.
+\item The equilibrium temperature is $T_{\rm eq}\approx720$\,K.
+\end{itemize}
+
+Figure~\ref{fig:fold} shows the folded light curves.
+
+\section{Vetting}
+For both candidates:
+\begin{itemize}
+\item \textbf{Robustness.} The signals persist with transit-masked detrending and alternative detrending choices. Measured independently, the box depths are $208\pm29$ and $263\pm34$\,ppm, with errors from matched-processing off-transit boxes.
+\item \textbf{Second reduction.} They appear in QLP, a second reduction of the same images: $225\pm35$ and $238\pm71$\,ppm.
+\item \textbf{Retrospective season checks.} In leave-one-season-out tests, the dip appears at the predicted epoch in three of four held-out seasons for each candidate. For TIC~370612437, the 2022 season (sectors 56--57) is weaker, at about $105\pm45$\,ppm. For HIP~114417, the data without 2019 are insufficient to recover the period.
+\item \textbf{Eclipsing-binary signatures.} Neither shows a secondary eclipse at phase 0.5, and the odd and even depths agree within $2\sigma$.
+\item \textbf{Stellar density.} The density implied by the transit shape alone is weakly constrained but consistent with the TIC value.
+\item \textbf{Companions and prior reports.} Gaia DR3 \citep{GaiaDR3} RUWE values (0.89, 1.03) and the Hipparcos--Gaia accelerations \citep{Brandt2021} show no sign of a bound companion. Neither star appears among the 341,351 SPOC TCEs, in the TESS-SPOC FFI DV manifests we checked, or in ExoFOP.
+\end{itemize}
+
+The main caveat is that the source is not localized. Difference images built from TESScut \citep{Brasseur2019} show positive target-position amplitudes in every sector, but they cannot exclude faint neighbours within about one pixel ($21''$). TIC~370612437 lies at $b_{\rm gal}=-1.3^\circ$ in a crowded field, where Gaia sources within $12''$ would need eclipse depths of only 3--5\%. A small detector-coordinate centroid shift in HIP~114417 is not significant once the spacecraft roll between sectors is taken into account. TRICERATOPS validation \citep{Giacalone2021} could not be completed.
+
+We therefore present both as unvalidated planet candidates. Seeing-limited photometry of nearby stars at the predicted epochs, together with high-resolution imaging, would test the blend scenarios. TESS is scheduled to reobserve TIC~370612437 in sectors 121, 122 and 129, and HIP~114417 in sectors 122 and 129. We published predicted transit times before these observations \citep{ChopraZenodo}.
+
+\begin{figure}[ht!]
+\plotone{figure1.pdf}
+\caption{TESS-SPOC 200\,s photometry from sectors 56--84 (gray), folded on each ephemeris, with 15-minute bins (black) and the best-fitting transit model (red).\label{fig:fold}}
+\end{figure}
+
+\begin{acknowledgments}
+This note uses TESS data from MAST (STScI) and Gaia data from ESA. The search and vetting code was written with the assistance of an AI coding agent (Claude Code, Anthropic), and independent code reviews were performed with OpenAI Codex. The author checked the analysis and is responsible for its content. Code, intermediate results and review reports are available on request.
+\end{acknowledgments}
+
+\facilities{TESS, Gaia}
+\software{astropy \citep{Astropy2022}, lightkurve \citep{Lightkurve2018}, wotan \citep{Hippke2019}, batman \citep{Kreidberg2015}, emcee \citep{ForemanMackey2013}}
+
+\bibliography{refs}{}
+\bibliographystyle{aasjournalv7}
+
+\end{document}
