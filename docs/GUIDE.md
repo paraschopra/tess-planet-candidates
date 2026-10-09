@@ -381,7 +381,7 @@ The people who submit a CTOI are credited as its identifiers. If the planet is l
   - names must have long-standing cultural, historical or geographical significance;
   - the star and planet names share a theme;
   - names of people (living or dead), pets and organisations are excluded.
-- **"Aakanksha"** (Sanskrit/Hindi for "aspiration" or "longing") can be used now as an informal nickname, as the animation does. Many famous objects have informal nicknames. To become official, the planet would first need to be confirmed and picked for a future campaign. A team would then propose it as a word with cultural meaning, not as a person's name, paired with a host-star name on the same theme (for example, another Sanskrit word about striving or the sky).
+- **"Aakanksha"** (Sanskrit/Hindi for "aspiration" or "longing") for TIC 370612437 and **"Orbit"** for HIP 114417 can be used now as informal nicknames, as the videos do. Many famous objects have informal nicknames. To become official, the planet would first need to be confirmed and picked for a future campaign. A team would then propose it as a word with cultural meaning, not as a person's name, paired with a host-star name on the same theme (for example, another Sanskrit word about striving or the sky).
 
 Sources: IAU NameExoWorlds rules (https://nameexoworlds.iau.org/2022naming-rules), TESS Follow-up Program (https://heasarc.gsfc.nasa.gov/docs/tess/tfop.html), ExoFOP-TESS submission guide (https://tess.mit.edu/followup/exofop-tess).
 
@@ -394,12 +394,12 @@ Sources: IAU NameExoWorlds rules (https://nameexoworlds.iau.org/2022naming-rules
 
 Make one for any candidate with `python pipeline/11_animation.py <TIC> "<nickname>"`.
 
-`media/candidates.mp4` is a 66-second combined video (`pipeline/15_combined_video.py`):
-1. the night sky from Earth, turning towards Cygnus;
-2. a 3D flight from the Sun to TIC 370612437 through 32,434 real stars at their Gaia distances;
-3. the star resolving into its disk;
-4. the transit with the real stacked data;
-5. both candidates on an all-sky map, with info cards;
+`media/candidates.mp4` is a 50-second combined video (`pipeline/15_combined_video.py`), built to hook in the first seconds:
+1. both candidates up front, with live transits and info cards;
+2. how we found them: the search funnel, the "is it new?" checks and signal strength;
+3. where candidate #1 is in the sky;
+4. a fast 3D flight through 32,434 real stars at their Gaia distances;
+5. the transit with the real stacked data;
 6. what happens next.
 
 The music is an original score synthesised in code (`pipeline/14_score.py`): ambient pads, a swell during the flight, and a low pulse as each planet crosses.

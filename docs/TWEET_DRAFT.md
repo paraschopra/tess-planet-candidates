@@ -1,6 +1,6 @@
 # Draft tweet thread (tentative candidates)
 
-Attach `docs/media/candidates.mp4` to tweet 1. Put the Zenodo/ExoFOP links in a short 6th tweet once they exist; tweet 5 has no room (a link counts as 23 characters).
+Attach `docs/media/candidates.mp4` (50 s) to tweet 1. Put the Zenodo/ExoFOP links in a short 6th tweet once they exist; tweet 5 has no room (a link counts as 23 characters).
 
 **1/5** (235 chars)
 
@@ -37,10 +37,10 @@ Why they're only candidates: TESS pixels are 21 arcsec wide, and a faint neighbo
 Two independent AI referees (Codex and a fresh Claude) agreed: promising, not yet vetted.
 ```
 
-**5/5** (268 chars)
+**5/5** (262 chars)
 
 ```
 Next: reporting both to NASA's ExoFOP as Community TESS Objects of Interest, so astronomers can check with ground telescopes. TESS looks again Aug 2027–Apr 2028; the predicted transit times are public.
 
-I've nicknamed the first one "Aakanksha" (Sanskrit: aspiration) ✨
+Nicknames: "Aakanksha" (Sanskrit: aspiration) and "Orbit" ✨
 ```

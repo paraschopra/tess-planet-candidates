@@ -1,16 +1,14 @@
-"""Combined explainer video: a real 3D flight from the Sun to TIC 370612437, its transit, then the other
-candidate, with an original score (14_score.py).
+"""Combined explainer video (~50 s): both candidates up front, how we found them, a fast real-3D flight to
+TIC 370612437, its transit, and what happens next. Original score from 14_score.py.
 
 Scenes (seconds):
-  0-4    title
-  4-10   the night sky from Earth, turning towards Cygnus; the target is marked
-  10-26  3D flight from the Sun to the star through real stars: 32,434 stars within 60 pc from the
-         TESS Input Catalog (Gaia positions and distances); bright stars beyond as a fixed backdrop,
-         plus a schematic Milky Way glow (the target lies in the galactic plane)
-  26-30  arrival: the star resolves into its disk
-  30-46  the transit: planet crossing on the fitted tilted path, real folded TESS data and model
-  46-56  where both candidates are, with an info card each (mini transit for the second)
-  56-66  what happens next
+  0-7    hook: "Two new exoplanet candidates found", sky map, a card per candidate with a live transit
+  7-17   how we found them: search funnel, "is it new?" checks, signal strength
+  17-21  where candidate #1 is in the sky (Cygnus), from Earth
+  21-28  fast 3D flight from the Sun through real stars (32,434 stars within 60 pc from the TESS Input
+         Catalog, Gaia distances; bright stars beyond as a fixed backdrop; schematic Milky Way glow), arrival
+  28-41  the transit: planet crossing on the fitted tilted path, real folded TESS data and model
+  41-50  what happens next
 Rendered in parallel chunks, concatenated, and muxed with the score.
 
 Writes results/media/candidates.mp4. Usage: python pipeline/15_combined_video.py [WORKERS]
@@ -40,13 +38,15 @@ from env import CATALOGS, RESULTS
 anim = importlib.import_module("11_animation")
 score_mod = importlib.import_module("14_score")
 
-W, H, DPI, FPS, DURATION = 1920, 1080, 100, 30, 66.0
+W, H, DPI, FPS, DURATION = 1920, 1080, 100, 30, 50.0
 MAIN, SECOND = 370612437, 252721481
-NICK = "Aakanksha"
+NICKS = {370612437: "Aakanksha", 252721481: "Orbit"}  # informal nicknames
+NICK = NICKS[370612437]
 LY = 3.2616
 BG, FG, DIM, ACCENT, RED = "#05070d", "#ece9e4", "#8d93a1", "#ffb066", "#ff5a4e"
 R_END_PC = 0.002  # stop ~400 AU from the star
-PULSES = (38.0, 51.0)  # transit mid-times in the video (score heartbeat)
+PULSES = (35.0,)  # main transit mid-time in the video (score heartbeat)
+FLIGHT = (21.0, 26.5)
 FAMOUS = {"Deneb": 102098, "Vega": 91262, "Altair": 97649, "Polaris": 11767}
 
 
@@ -162,26 +162,28 @@ def load():
         info["rgb"] = anim.STAR_COLOUR[min(anim.STAR_COLOUR, key=lambda T: abs(T - m.Teff))]
         D[tic] = info
     D["u_target"] = unit(D[MAIN]["ra"], D[MAIN]["dec"])
-    D["u_start"] = unit(300.0, 30.0)
+    D["u_start"] = unit(312.0, 44.0)
     D["main_idx"] = np.where(D["near_tic"] == MAIN)[0]
 
 
 # ---------------------------------------------------------------- scene pieces
 def remaining_pc(t):
     Dm = D[MAIN]["dist"]
-    if t < 10:
+    f0, f1 = FLIGHT
+    mid = f0 + 0.65 * (f1 - f0)
+    if t < f0:
         return Dm
-    if t < 21:
-        return Dm - (Dm - 2.0) * smooth((t - 10) / 11)
-    if t < 26:
-        return 2.0 * (R_END_PC / 2.0) ** smooth((t - 21) / 5)
+    if t < mid:
+        return Dm - (Dm - 2.0) * smooth((t - f0) / (mid - f0))
+    if t < f1:
+        return 2.0 * (R_END_PC / 2.0) ** smooth((t - mid) / (f1 - mid))
     return R_END_PC
 
 
 def camera_at(t):
     Dm = D[MAIN]["dist"]
-    look = slerp(D["u_start"], D["u_target"], ramp(t, 4.5, 9.5))
-    fov = 72 - 14 * ramp(t, 4, 12)
+    look = slerp(D["u_start"], D["u_target"], ramp(t, 17, 20))
+    fov = 70 - 12 * ramp(t, 17, 22)
     return Camera((Dm - remaining_pc(t)) * D["u_target"], look, fov)
 
 
@@ -224,8 +226,8 @@ def draw_sky(ax, t, dim=1.0, labels=0.0, target_alpha=1.0):
         if tok[0]:
             pulse = 1 + 0.25 * np.sin(t * 2 * np.pi * 0.8)
             ax.scatter(tx, ty, s=900 * pulse, facecolor="none", edgecolor=RED, lw=2, alpha=labels, zorder=6)
-            ax.text(tx[0] + 30, ty[0] - 40, f"TIC {MAIN}\nin {D[MAIN]['const']}, {D[MAIN]['dist'] * LY:.0f} light-years",
-                    color=FG, fontsize=15, alpha=labels, zorder=6)
+            ax.text(tx[0] + 30, ty[0] - 40, f'Candidate #1 "{NICK}"\nTIC {MAIN} · {D[MAIN]["dist"] * LY:.0f} light-years',
+                    color=FG, fontsize=16, alpha=labels, zorder=6)
     return cam
 
 
@@ -278,6 +280,47 @@ def text(ax, x, y, s, size, alpha, color=FG, weight="normal", ha="left"):
 
 
 # ---------------------------------------------------------------- frame
+def box(ax, x, y, w, h, alpha, big, small, colour="#141b2d", edge=ACCENT):
+    from matplotlib.patches import FancyBboxPatch
+    if alpha <= 0.01:
+        return
+    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=18", fc=colour, ec=edge,
+                                lw=1.5, alpha=0.95 * alpha, zorder=15))
+    text(ax, x + w / 2, y + h * 0.64, big, 30, alpha, ACCENT, weight="bold", ha="center")
+    for j, line in enumerate(small.split("\n")):
+        text(ax, x + w / 2, y + h * 0.33 - j * 22, line, 13.5, alpha, FG, ha="center")
+
+
+def arrow(ax, x0, x1, y, alpha):
+    if alpha > 0.01:
+        ax.annotate("", xy=(x1, y), xytext=(x0, y), zorder=15,
+                    arrowprops=dict(arrowstyle="-|>", color=DIM, lw=2, alpha=alpha, mutation_scale=18))
+
+
+def sky_map(fig, rect, t, a):
+    sky = fig.add_axes(rect, projection="mollweide", facecolor="#0e1324")
+    br = D["bright_dir"]
+    ra = np.degrees(np.arctan2(br[:, 1], br[:, 0])) % 360
+    dec = np.degrees(np.arcsin(br[:, 2]))
+    sky.scatter(-np.radians(((ra + 180) % 360) - 180), np.radians(dec), s=np.clip(5.5 - D["bright_m"], 0.2, 5) ** 1.7,
+                color="white", alpha=0.7 * a, lw=0)
+    mw = D["mw_dir"][::6]
+    mra = np.degrees(np.arctan2(mw[:, 1], mw[:, 0])) % 360
+    sky.scatter(-np.radians(((mra + 180) % 360) - 180), np.arcsin(mw[:, 2]), s=2, color="#7b8cff", alpha=0.06 * a, lw=0)
+    for k, tic in enumerate((MAIN, SECOND)):
+        i = D[tic]
+        x0 = -np.radians(((i["ra"] + 180) % 360) - 180)
+        sky.scatter([x0], [np.radians(i["dec"])], s=150 + 60 * np.sin(t * 5 + k), facecolor="none", edgecolor=RED, lw=2, alpha=a)
+        # candidate #2 (higher RA) sits left of #1 on an east-left chart
+        sky.text(x0 + (-0.12 if tic == MAIN else 0.12), np.radians(i["dec"]) + (-0.17 if tic == MAIN else 0.1),
+                 f"#{k + 1}", color=FG, fontsize=12, weight="bold", ha="left" if tic == MAIN else "right", alpha=a)
+    sky.set_xticklabels([])
+    sky.set_yticklabels([])
+    sky.grid(alpha=0.12 * a)
+    for sp in sky.spines.values():
+        sp.set_alpha(0.4 * a)
+
+
 def render(fig, t):
     fig.clf()
     ax = fig.add_axes([0, 0, 1, 1], facecolor=BG)
@@ -286,102 +329,112 @@ def render(fig, t):
     ax.axis("off")
     main = D[MAIN]
 
-    if t < 30:  # sky, flight, arrival
-        dim = 0.35 + 0.65 * ramp(t, 2.5, 4.5) if t < 4.5 else 1.0
-        labels = ramp(t, 6, 8) * (1 - ramp(t, 10, 11.5))
-        draw_sky(ax, t, dim=dim, labels=labels, target_alpha=1 - ramp(t, 25.5, 28))
-        a = 1 - ramp(t, 3.2, 4.2)
-        text(ax, W / 2, H * 0.60, "Two Earth-sized planet candidates", 46, a, weight="bold", ha="center")
-        text(ax, W / 2, H * 0.52, "found in five years of NASA TESS data, with Claude Code", 24, a, DIM, ha="center")
-        text(ax, W / 2, H * 0.44, "tentative  ·  not yet confirmed", 20, a, ACCENT, ha="center")
-        if 10 <= t < 27:
-            traveled = (main["dist"] - remaining_pc(t)) * LY
-            a = ramp(t, 10, 11) * (1 - ramp(t, 25.5, 26.5))
-            text(ax, 60, 80, f"{traveled:5.1f} light-years from Earth", 26, a, ACCENT, weight="bold")
-            text(ax, 60, 40, "every dot is a real star, at its real distance (ESA Gaia)", 15, a, DIM)
-            a2 = ramp(t, 12, 13) * (1 - ramp(t, 17, 18))
-            text(ax, W / 2, H - 70, f"Light from this star takes {main['dist'] * LY:.0f} years to reach us", 22, a2, FG, ha="center")
-            a3 = ramp(t, 19, 20) * (1 - ramp(t, 24, 25))
-            text(ax, W / 2, H - 70, "TESS saw it dim by 0.02% every 3.56 days", 22, a3, FG, ha="center")
-        if t >= 25:  # the star resolves into its disk (drawn by draw_sky's caller below)
-            g = ramp(t, 25, 29.5)
-            draw_disk(ax, W / 2, H / 2, 30 + 330 * g, g, main)
-            text(ax, W / 2, 90, f"An orange dwarf, {main['rad']:.2f}× the Sun's width, {main['teff']:.0f} K", 22,
-                 ramp(t, 27, 28.5), DIM, ha="center")
+    if t < 7:  # hook: both candidates, alive from the first frame
+        draw_sky(ax, 17, dim=0.18, target_alpha=0)
+        a = 1 - ramp(t, 6.4, 7)
+        text(ax, W / 2, H - 70, "Two new exoplanet candidates found", 50, a, weight="bold", ha="center")
+        text(ax, W / 2, H - 128, "in five years of NASA TESS data  ·  Earth-sized  ·  tentative, not yet confirmed", 21, a,
+             ACCENT, ha="center")
+        sky_map(fig, [0.345, 0.50, 0.31, 0.28], t, a)
+        cards = ((MAIN, f'#1  "{NICKS[MAIN]}"', f"TIC {MAIN}"), (SECOND, f'#2  "{NICKS[SECOND]}"', "HIP 114417  (TIC 252721481)"))
+        for k, (tic, title, name) in enumerate(cards):
+            i = D[tic]
+            x0 = 70 + k * W / 2
+            ax.add_patch(plt.Rectangle((x0 - 30, 50), W / 2 - 100, 440, color="#121827", alpha=0.88 * a, zorder=10))
+            text(ax, x0, 448, title, 30, a, ACCENT, weight="bold")
+            text(ax, x0, 398, name, 18, a, FG)
+            lines = [f"in {i['const']}, {i['dist'] * LY:.0f} light-years away",
+                     f"about {i['rp']:.1f}× Earth's size",
+                     f"orbits its star every {i['P']:.2f} days",
+                     f"dims it by {i['depth'] / 1e4:.3f}% for {i['t14']:.1f} hours",
+                     f"~{i['teq']:.0f} K: far too hot for life"]
+            for j, ln in enumerate(lines):
+                text(ax, x0, 345 - j * 50, ln, 18, a, FG if j < 2 else DIM)
+            loop = (t / 4.0 + 0.5 - 0.12 * k) % 1.0  # a crossing every 4 s; both planets on their stars at frame one
+            draw_disk(ax, x0 + 690, 250, 115, a, i, planet_t=-1.7 + 3.4 * loop, zoom=4, path=True, z=12)
+        text(ax, W / 2, 22, "found with Claude Code  ·  planets drawn 4× larger  ·  nicknames are informal", 12, a, DIM, ha="center")
         return
 
-    if t < 46:  # the transit
-        draw_sky(ax, 26, dim=0.25, target_alpha=0)
-        s = ramp(t, 30, 31.5)
+    if t < 17:  # how we found them
+        draw_sky(ax, 17, dim=0.15, target_alpha=0)
+        out = 1 - ramp(t, 16.4, 17)
+        text(ax, W / 2, H - 70, "How we found them", 42, ramp(t, 7, 7.6) * out, weight="bold", ha="center")
+        steps = [("526", "nearby stars, never in\nTESS's sharpest mode"), ("5 years", "of NASA TESS images,\nup to 44 sectors per star"),
+                 ("~1 million", "possible orbits\ntested per star"), ("743", "repeating dips\nfound"),
+                 ("31", "pass every\nred-flag test"), ("2", "stronger than\nchance allows")]
+        bw, gap, x = 262, 48, 70
+        for j, (big, small) in enumerate(steps):
+            al = ramp(t, 7.6 + 0.55 * j, 8.1 + 0.55 * j) * out
+            box(ax, x + j * (bw + gap), 690, bw, 170, al, big, small, edge=RED if j == 5 else ACCENT)
+            if j:
+                arrow(ax, x + j * (bw + gap) - gap + 6, x + j * (bw + gap) - 6, 775, al)
+        groups = [(70, "Are they new?", ["0 of 341,351 NASA automatic planet alerts", "no TOI or community candidate on ExoFOP",
+                                          "no planet papers on either star (SIMBAD)"]),
+                  (W / 2 + 10, "Are they real?", ["signal strength 7.2σ (#1) and 7.7σ (#2), red-noise aware",
+                                                   "same dip in NASA's and MIT's independent data",
+                                                   "hid a season, predicted it blind: 3 of 4 hits",
+                                                   "in 526 upside-down light curves, chance never got this strong"])]
+        for g, (x0, head, items) in enumerate(groups):
+            al = ramp(t, 11.3 + 1.6 * g, 11.9 + 1.6 * g) * out
+            ax.add_patch(plt.Rectangle((x0, 170), W / 2 - 80, 440, color="#121827", alpha=0.85 * al, zorder=10))
+            text(ax, x0 + 30, 565, head, 26, al, ACCENT, weight="bold")
+            for j, it in enumerate(items):
+                aj = ramp(t, 11.6 + 1.6 * g + 0.35 * j, 12.1 + 1.6 * g + 0.35 * j) * out
+                text(ax, x0 + 30, 495 - j * 78, "✓", 24, aj, "#7ee08a", weight="bold")
+                text(ax, x0 + 75, 495 - j * 78, it, 17, aj, FG)
+        text(ax, W / 2, 105, "Not yet confirmed: a faint neighbouring pair of eclipsing stars could still mimic the dip",
+             19, ramp(t, 14.6, 15.2) * out, ACCENT, ha="center")
+        return
+
+    if t < 28.5:  # where is it, fast flight, arrival
+        dim = ramp(t, 17, 17.6)
+        labels = ramp(t, 17.6, 18.4) * (1 - ramp(t, 20.6, 21.3))
+        draw_sky(ax, t, dim=dim, labels=labels, target_alpha=1 - ramp(t, 25.6, 27.5))
+        text(ax, W / 2, H - 70, f'Where is candidate #1, "{NICK}"?', 36, ramp(t, 17.2, 17.9) * (1 - ramp(t, 20.6, 21.3)),
+             weight="bold", ha="center")
+        if t >= FLIGHT[0]:
+            traveled = (main["dist"] - remaining_pc(t)) * LY
+            a = ramp(t, 21, 21.5) * (1 - ramp(t, 26.3, 27))
+            text(ax, 60, 80, f"{traveled:5.1f} light-years from Earth", 26, a, ACCENT, weight="bold")
+            text(ax, 60, 40, "every dot is a real star, at its real distance (ESA Gaia)", 15, a, DIM)
+            text(ax, W / 2, H - 70, f"Its light takes {main['dist'] * LY:.0f} years to reach us", 24,
+                 ramp(t, 21.5, 22) * (1 - ramp(t, 25, 25.6)), FG, ha="center")
+        if t >= 25.5:  # the star resolves into its disk
+            g = ramp(t, 25.5, 28.3)
+            draw_disk(ax, W / 2, H / 2, 30 + 330 * g, g, main)
+            text(ax, W / 2, 90, f"An orange dwarf, {main['rad']:.2f}× the Sun's width, {main['teff']:.0f} K", 22,
+                 ramp(t, 26.8, 27.8), DIM, ha="center")
+        return
+
+    if t < 41:  # the transit
+        draw_sky(ax, 26.5, dim=0.25, target_alpha=0)
+        s = ramp(t, 28.5, 29.8)
         cx, R = W / 2 + (0.27 * W - W / 2) * s, 360
-        planet_hr = -3.2 + 6.4 * np.clip((t - 31.5) / 13.0, 0, 1)
-        draw_disk(ax, cx, H / 2 - 30, R, 1.0, main, planet_t=planet_hr if t >= 31 else None)
-        a = ramp(t, 30.5, 32)
-        text(ax, 60, H - 60, f'Planet candidate "{NICK}"', 40, a, weight="bold")
+        planet_hr = -3.2 + 6.4 * np.clip((t - 29.5) / 11.0, 0, 1)
+        draw_disk(ax, cx, H / 2 - 30, R, 1.0, main, planet_t=planet_hr if t >= 29.2 else None)
+        a = ramp(t, 28.8, 30)
+        text(ax, 60, H - 60, f'Candidate #1 "{NICK}"', 40, a, weight="bold")
         text(ax, 60, H - 110, f"around TIC {MAIN}  ·  about {main['rp']:.2f} ± {main['rp_err']:.2f} Earth radii  ·  "
              f"one orbit every {main['P']:.2f} days  ·  ~{main['teq']:.0f} K", 19, a, DIM)
         draw_curve(fig, [0.56, 0.28, 0.40, 0.46], main, planet_hr, a)
         text(ax, 0.56 * W, 0.78 * H, "The star's brightness, all transits stacked", 18, a, FG)
         text(ax, 0.56 * W, 0.22 * H, "grey: real TESS measurements (2022–2024)  ·  orange: transit model", 14, a, DIM)
-        text(ax, 60, 40, "Planet drawn 4× larger than true size. Nickname is informal, not an official IAU name.", 13, a, DIM)
-        if t > 44.5:  # fade out
-            ax.add_patch(plt.Rectangle((0, 0), W, H, color=BG, alpha=ramp(t, 44.5, 46), zorder=50))
-        return
-
-    if t < 56:  # both candidates
-        draw_sky(ax, 26, dim=0.12, target_alpha=0)
-        a = ramp(t, 46, 47.5) * (1 - ramp(t, 55, 56))
-        text(ax, W / 2, H - 60, "Two candidates, both in the northern sky", 34, a, weight="bold", ha="center")
-        sky = fig.add_axes([0.31, 0.50, 0.38, 0.36], projection="mollweide", facecolor="#0e1324")
-        br = D["bright_dir"]
-        ra = np.degrees(np.arctan2(br[:, 1], br[:, 0])) % 360
-        dec = np.degrees(np.arcsin(br[:, 2]))
-        sx = -np.radians(((ra + 180) % 360) - 180)
-        sky.scatter(sx, np.radians(dec), s=np.clip(5.5 - D["bright_m"], 0.2, 5) ** 1.7, color="white", alpha=0.7 * a, lw=0)
-        mw = D["mw_dir"][::6]
-        mra = np.degrees(np.arctan2(mw[:, 1], mw[:, 0])) % 360
-        sky.scatter(-np.radians(((mra + 180) % 360) - 180), np.arcsin(mw[:, 2]), s=2, color="#7b8cff", alpha=0.05 * a, lw=0)
-        for tic, lab in ((MAIN, f'"{NICK}"'), (SECOND, "HIP 114417")):
-            i = D[tic]
-            x0 = -np.radians(((i["ra"] + 180) % 360) - 180)
-            sky.scatter([x0], [np.radians(i["dec"])], s=160 + 60 * np.sin(t * 5), facecolor="none", edgecolor=RED, lw=2, alpha=a)
-            sky.text(x0 + (-0.12 if tic == MAIN else 0.12), np.radians(i["dec"]) + (-0.16 if tic == MAIN else 0.1), lab,
-                     color=FG, fontsize=11, ha="left" if tic == MAIN else "right", alpha=a)
-        sky.set_xticklabels([])
-        sky.set_yticklabels([])
-        sky.grid(alpha=0.12 * a)
-        for sp in sky.spines.values():
-            sp.set_alpha(0.4 * a)
-        for k, (tic, title) in enumerate(((MAIN, f'"{NICK}"  ·  TIC {MAIN}'), (SECOND, "HIP 114417  ·  TIC 252721481"))):
-            i = D[tic]
-            x0 = 80 + k * W / 2
-            ax.add_patch(plt.Rectangle((x0 - 30, 60), W / 2 - 100, 420, color="#121827", alpha=0.85 * a, zorder=10))
-            text(ax, x0, 440, title, 21, a, ACCENT, weight="bold")
-            lines = [f"in {i['const']}, {i['dist'] * LY:.0f} light-years away",
-                     f"about {i['rp']:.2f} ± {i['rp_err']:.2f} Earth radii",
-                     f"one orbit every {i['P']:.2f} days",
-                     f"dims its star by {i['depth'] / 1e4:.3f}% for {i['t14']:.1f} h",
-                     f"~{i['teq']:.0f} K: far too hot for life",
-                     f"TESS looks again from {'Aug' if tic == MAIN else 'Sep'} 2027"]
-            for j, ln in enumerate(lines):
-                text(ax, x0, 385 - j * 46, ln, 17, a, FG if j < 2 else DIM)
-            # mini transit for the second candidate, a static disk for the first
-            mini_t = -3.2 + 6.4 * np.clip((t - 48) / 6, 0, 1)
-            draw_disk(ax, x0 + 700, 300, 95, a, i, planet_t=mini_t if tic == SECOND else 0.0, zoom=4,
-                      path=tic == SECOND, z=12)
+        text(ax, 60, 40, "Planet drawn 4× larger than true size. Nicknames are informal, not official IAU names.", 13, a, DIM)
+        if t > 40.2:
+            ax.add_patch(plt.Rectangle((0, 0), W, H, color=BG, alpha=ramp(t, 40.2, 41), zorder=50))
         return
 
     # what next
-    draw_sky(ax, 26, dim=0.3, target_alpha=0)
+    draw_sky(ax, 26.5, dim=0.3, target_alpha=0)
     lines = [("What happens next", 38, FG, "bold"),
              ("Report both to NASA's ExoFOP, where astronomers coordinate follow-up", 22, FG, "normal"),
              ("Ground telescopes check that no faint neighbouring star is the real source", 22, FG, "normal"),
              ("TESS watches both stars again in 2027–28: the dips should return on schedule", 22, FG, "normal"),
              ("Until then: tentative planet candidates, not confirmed planets", 22, ACCENT, "normal")]
-    for j, (s, size, col, wt) in enumerate(lines):
-        a = ramp(t, 56.3 + 1.2 * j, 57.3 + 1.2 * j) * (1 - ramp(t, 64.5, 66))
-        text(ax, W / 2, H * 0.70 - j * 80, s, size, a, col, weight=wt, ha="center")
-    a = ramp(t, 61, 62) * (1 - ramp(t, 64.5, 66))
+    for j, (txt, size, col, wt) in enumerate(lines):
+        a = ramp(t, 41.3 + 0.9 * j, 42.1 + 0.9 * j) * (1 - ramp(t, 48.8, 50))
+        text(ax, W / 2, H * 0.70 - j * 80, txt, size, a, col, weight=wt, ha="center")
+    a = ramp(t, 45, 46) * (1 - ramp(t, 48.8, 50))
     text(ax, W / 2, 70, "Made with Claude Code  ·  data: NASA TESS, ESA Gaia, TESS Input Catalog  ·  original score generated in code",
          14, a, DIM, ha="center")
 
@@ -413,7 +466,7 @@ def main():
         paths = pool.map(render_chunk, jobs)
     (seg_dir / "list.txt").write_text("".join(f"file '{p}'\n" for p in paths))
     # music: same scene timings as the video
-    audio = score_mod.score(DURATION, flight=(10.0, 26.0), transits=PULSES, sparkle_spans=((4.0, 26.0), (46.0, 62.0)))
+    audio = score_mod.score(DURATION, flight=FLIGHT, transits=PULSES, sparkle_spans=((0.5, 17.0), (41.0, 47.0)))
     score_mod.write_wav(out_dir / "score.wav", audio)
     out = out_dir / "candidates.mp4"
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(seg_dir / "list.txt"),
