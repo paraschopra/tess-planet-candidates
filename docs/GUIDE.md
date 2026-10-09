@@ -57,6 +57,12 @@ A planet nobody has found is most likely hiding around a star that:
 - **SNR** (signal-to-noise ratio): how big the dip is compared to the random jitter in the data. Around 7 is the usual minimum to take a signal seriously; 10+ is comfortable.
 - **SDE** (signal detection efficiency): how much the best orbit stands out compared to all the other orbits the search tried. A high SDE means one period is clearly special rather than the search just picking the biggest bump in noise.
 
+### Reading the diagnostic pictures
+- **Periodogram, and "one sharp peak".** The search tries about a million possible orbit lengths. For each one it lines up the data at that rhythm and scores how much of a dip appears. The periodogram is a plot of score against orbit length. A real planet gives one tall, narrow spike at its true period, standing well above a flat "grass" of noise. Trouble looks different: several similar spikes, a broad hump, or spikes at many related periods (half, double). Those suggest noise, star spots or instrument rhythms.
+- **Folded transit, and "box-shaped dip".** Once a period is chosen, every transit is stacked on top of the others ("folding"), which beats down the noise. A planet crossing a star gives a dip with a quick drop, a flat bottom and a quick rise, like a shallow box (slightly rounded, because a star's edge is dimmer than its centre). A star's slow brightness wave gives a smooth, rounded sag instead. An eclipse by a star that only grazes the edge gives a pointed "V".
+- **Odd/even test, and "matching alternate dips".** Number the transits 1, 2, 3, 4… and stack the odd ones separately from the even ones. A planet makes the same dip every time, so both stacks match. The most common impostor is two stars orbiting each other, seen at twice the true period. Each star passes in front of the other once per orbit, and the two stars usually differ in size or brightness, so the eclipses alternate deep, shallow, deep, shallow. Unequal odd and even dips give it away.
+- **Secondary eclipse.** Halfway between transits, the planet passes *behind* its star. A small planet gives off almost no light of its own, so nothing measurable happens. A companion *star* does glow, so when it is hidden behind its partner the total light drops a little. A small dip exactly halfway between the main dips (phase 0.5) means a star, not a planet.
+
 ---
 
 ## Part 2: the phases
@@ -217,7 +223,7 @@ Results: **743 → 31 with no hard flags → 10 with no flags at all.** With ~1,
 - `figures/306635397_s1.png`: an apparent Earth-sized planet with 42 transits. The per-sector panel shows that almost all the signal comes from two glitches, in sectors 87 and 97. This led to the "few events dominate" flag.
 - `figures/258748095_s2.png`: the dip sits inside a broad, wavy depression, and its depth swings between sectors. That is stellar variability, and it led to the "broad depression" and "inconsistent sectors" flags.
 
-### The two strongest candidates (not yet vetted; Phase 3 tests have not been run)
+### The two strongest candidates (Phase 2 view; see Part 4 for the Phase 3 vetting)
 
 | | TIC 370612437 | TIC 252721481 |
 |---|---|---|
@@ -227,13 +233,13 @@ Results: **743 → 31 with no hard flags → 10 with no flags at all.** With ~1,
 | Implied size | ~1.1 Earth radii | ~1.1 Earth radii |
 | Star | K dwarf, 4380 K, 0.66 R☉, Tmag 9.8 | K dwarf, 4301 K, 0.61 R☉, Tmag 9.7 |
 | Distance | 48 pc (~158 ly) | 41 pc (~134 ly) |
-| Data | 8 sectors, 2019–2025, 55 transits | 5 sectors, 2019–2025, 21 transits |
+| Data | 8 sectors, Sep 2019 – Oct 2024, 55 transits | 5 sectors, Sep 2019 – Oct 2024, 21 transits |
 | SDE / SNR | 11.3 / 8.4 | 10.3 / 8.1 |
 
 Both show:
 - a single clean periodogram peak;
 - a box-shaped folded dip;
-- consistent depth in *every* sector across six years;
+- consistent depth in *every* sector across five years;
 - matching odd/even dips;
 - no secondary eclipse.
 
@@ -245,3 +251,120 @@ Caveats to resolve in Phase 3:
 - Neither has had pixel-level, catalog or literature checks yet.
 
 Figures: `figures/370612437_s1.png`, `figures/252721481_s1.png`.
+
+---
+
+## Part 4: Phase 3 results (2026-10-09)
+
+**Bottom line:** both signals survived every attempt to explain them away as noise, instrument glitches or processing artifacts. Neither could be pinned to its own star. TESS's pixels are too coarse to rule out a faint neighbouring pair of eclipsing stars, so both stay **weak candidates that need more data**. They are not yet planets, and not yet ready to report as well-vetted candidates. Two independent auditors (OpenAI's Codex and a fresh Claude session) reached the same verdict.
+
+### Why only 2 of the 10 flag-free signals?
+The search tried about a million orbits per star on 526 stars, about 1,500 searches counting repeat passes. Across that many tries, chance alone produces some impressive-looking signals. We measured how impressive with an **upside-down test**:
+- Flip every light curve so that dips become bumps and bumps become dips.
+- Run the identical search and the identical red-flag triage.
+
+A real planet only makes dips, so anything found in flipped data is noise, star spots or instrument behaviour, by construction.
+
+**Partial result; the full 526-star run is still in progress.** Over the first 416 flipped stars, put through the full triage (by the independent auditor), not one flag-free signal reached SDE 10. The highest was 8.45.
+
+The other 8 flag-free signals have SDE 7.0–8.1, inside the range the flipped data produce, so we can't tell them apart from chance. The two leaders, at SDE 11.3 and 10.3, stand above anything the flipped survey produced once triage is applied.
+
+A second check scrambled each candidate's own light curve:
+- mask out the transits;
+- slide each sector by a random amount;
+- search again, 38 times.
+
+The best fake signals reached SDE 8.5 and 9.3, against the real 11.3 and 10.3. Extrapolating, about 0.01 (370612437) and 0.2 (252721481) false alarms this strong are expected across the whole survey. These figures are uncertain by roughly 10×.
+
+### The tests and what they found
+
+| Test (plain language) | TIC 370612437 (P = 3.565 d) | TIC 252721481 (P = 4.934 d) |
+|---|---|---|
+| **Already known?** TOI, CTOI, ExoFOP, SIMBAD literature, and all 341,351 NASA automatic alerts (TCEs) | Nothing. None of our 526 stars has ever had a NASA alert, because NASA's automatic search only covers 2-minute targets. | Nothing. The star (HIP 114417) is on NASA's Habitable Worlds Observatory target lists, but no planet has been reported. |
+| **Hidden companion star?** Gaia wobble (RUWE) and binary flags; Hipparcos-to-Gaia motion change | None seen (RUWE 0.89). | None seen (RUWE 1.03; no change in motion between 1991 and 2016). |
+| **Physical model fit:** a realistic transit shape, with 30-min exposures smoothed and correlated noise included | 1.04 ± 0.15 Earth radii, tilted orbit (b ≈ 0.73), 1.4 h duration. The shape alone implies a star density matching the catalog K dwarf. | 1.10 ± 0.14 Earth radii, b ≈ 0.68, 1.6 h duration. Density also consistent. |
+| **Second pipeline:** the same dip in MIT's independently processed QLP light curves? | Yes: 225 ± 29 ppm vs NASA's 208 ± 25. QLP's individual sectors scatter more than their error bars (p = 0.004). | Yes: 238 ± 52 ppm vs 263 ± 32. |
+| **Hide-a-season prediction:** search the other seasons blind, predict the hidden season's transit times, look only there | 3 of 4 seasons confirmed: the dip appears exactly at the predicted time (3.0–5.2σ), deeper than anywhere else in the orbit. **2022 fails** (40 ± 42 ppm). | 3 of 4 confirmed (2.8–4.6σ, the deepest point in the orbit). Hiding 2019 leaves too little data for the blind search to find the period at all. |
+| **Which star is dimming?** Difference images of the raw pixels | Dimming detected near the target in 8/8 sectors, but too weakly to locate. 471 Gaia stars lie within 150"; three faint ones within 12" would need only 3–5% eclipses. | Dimming detected in 5/5 sectors, location unconstrained. NASA's own centroid data shows a small consistent shift (3.5σ), which hints at a source about one pixel away. |
+| **Instrument glitches?** Momentum dumps, data gaps, shared periods in other stars | Only 3 of 51 transits are near a dump or gap. Stacking 88 other stars at this period gives nothing. | 95% of individual transits dip. Nothing in other stars. |
+| **Period aliases?** Twice or half the period, odd/even, phase 0.5 | P strongly preferred over P/2. No secondary eclipse. Odd/even differ by 1.4σ. | No secondary eclipse. Odd/even differ by 2.0σ. |
+
+Figures: `figures/<TIC>_fit.png` (model fit), `figures/<TIC>_holdout.png` (hide-a-season), `figures/<TIC>_products.png` (NASA vs MIT), `figures/<TIC>_pixels.png` (difference images).
+
+### The 2022 problem (TIC 370612437)
+The four seasons show 186 ± 50, 103 ± 48, 235 ± 42 and 243 ± 41 ppm. The 2022 season is low:
+- Statistically this is not alarming: a consistency test gives p = 0.12.
+- But the blind hide-2022 prediction found essentially nothing there.
+
+Explanations considered:
+- **A blend whose light share changes between sectors.** Ruled out as a simple contamination change: the crowding numbers in 2022 match the other years.
+- **Timing variations from another planet.** Unsupported: the 2022 timing is simply unconstrained.
+- **Noise.** Plausible.
+
+It stays an open question.
+
+### What the audits changed
+We asked Codex (OpenAI) and a fresh Claude agent to break the analysis, read-only. Their full reports are in `results/phase3/audit_codex.md` and `results/phase3/audit_claude.md`. What they caught, and what we did:
+- **Noise was slightly underestimated.** The control boxes used to measure noise had been cleaned slightly differently from the transit box. Fixed. Significance dropped from about 8.2σ to **7.2σ and 7.7σ**.
+- **The model fit had a prior-math slip** (a missing Jacobian) and ignored correlated noise. Both fixed. Sizes barely changed.
+- **The first pixel test could "locate" a brightening as easily as a dimming,** and treated each sector separately. It was rewritten as a joint fit across all sectors, with balanced before/after frames, every neighbour tested as the possible source, and TESS-band brightnesses.
+- **The hide-a-season test had been adjusted after one fold failed** (a finer box width). We report both versions, and the failures stand.
+- **The first upside-down test** searched for only one signal and skipped triage. It was redone with the full pipeline.
+- **Confirmed correct:** the orbital physics, density units, image orientation, binning and the exposure smoothing.
+
+### Verdict
+| | TIC 370612437 | TIC 252721481 |
+|---|---|---|
+| Is the dip real (not noise)? | Very likely: survey false-alarm expectation about 0.01 | Likely: about 0.2 |
+| Is it on this star? | **Unknown.** Very crowded field, so a faint background eclipsing pair can't be excluded | **Unknown**, with a mild hint of an off-target source |
+| Status | Weak candidate, needs more data | Weak candidate, needs more data |
+
+### What would settle it
+1. **Ground-based telescopes with sharper vision** (pixels about 1" rather than 21"). They can't see a 0.02% dip, but they can easily check whether any nearby faint star has a deep eclipse at the predicted times. This is the standard "neighbour clearing" step that TESS follow-up teams (TFOP) do for every candidate.
+2. **Statistical validation (TRICERATOPS)**, which weighs the planet scenario against every blend scenario using the real neighbours.
+3. **Future TESS sectors.** More transits at the predicted times would test the period and the 2022 deficit. Requesting 2-minute data for both stars would sharpen the pixel test.
+4. **Submit as CTOIs**, with every caveat above stated plainly. That puts them in front of the professionals who can do steps 1 and 2.
+
+---
+
+## Part 5: from candidate to planet: reporting, confirmation and naming
+
+### What "confirmed" means
+No one can confirm a planet from TESS data alone, including NASA. A TESS dip proves only that *something* periodically blocks light somewhere in those 21-arcsecond pixels. Turning a candidate into a planet takes other telescopes:
+
+1. **Clear the neighbours (ground-based photometry).** Telescopes with ~1" pixels watch the field at the predicted transit times. They can't see a 0.02% dip, but any nearby faint star with a deep eclipse at those times shows up easily. If every neighbour is clean, the dip must come from the target or something extremely close to it.
+2. **High-resolution imaging** (adaptive optics or speckle cameras on 4–10 m telescopes) rules out companion stars hiding within ~0.1–1".
+3. **Reconnaissance spectra** check the star is single, quiet and as the catalog says (not a disguised binary).
+4. Then either:
+   - **Statistical validation**, as most small TESS planets get. A program such as TRICERATOPS combines all of the above with the light curve to show a blend is improbable, typically a false-positive probability below 1.5%.
+   - **A mass measurement** with precise radial velocities. A ~1 Earth-radius planet around an 11th-magnitude K dwarf would wobble its star by under 1 m/s, which is at the limit of the best instruments today. That is why validation is the usual route.
+
+### Who to report to
+- **ExoFOP-TESS** (https://exofop.ipac.caltech.edu, run by NASA's Exoplanet Science Institute at Caltech) is where the TESS community coordinates.
+  1. Create a free account.
+  2. Submit each signal as a **CTOI** (Community TESS Object of Interest), named by its TIC number plus a suffix: **TIC 370612437.01** and **TIC 252721481.01**.
+  3. Include the period, epoch, depth, duration and size, and a note listing every caveat.
+- **The TESS TOI team at MIT** reviews CTOIs. If it meets their standards, it becomes an official **TOI** with a TOI number. That puts it on the target lists of the **TESS Follow-up Observing Program (TFOP)**, the network of professional and amateur observatories that do steps 1–3 above. Anyone can apply to join TFOP.
+- **TESS Director's Discretionary Time.** The Reddit poster asked for their star to get 2-minute observations in a future sector. That sharpens both the dip and the pixel test.
+- **Preregistration** (optional, as in the Reddit post): publish the predicted transit times for upcoming TESS sectors, for example on Zenodo, *before* the data arrive. That makes the next sector a clean prediction test.
+
+The people who submit a CTOI are credited as its identifiers. If the planet is later validated, they are normally invited onto the discovery paper.
+
+### Naming
+- **The scientific name is automatic:** the star's name plus a letter, starting at "b". If confirmed these would be **TOI-XXXX b** (once a TOI number is assigned), or **TIC 370612437 b** and **HIP 114417 b**.
+- **Official proper names come only from the IAU** (International Astronomical Union), through occasional public **NameExoWorlds** campaigns (2015, 2019, 2022). In these, teams in each country propose a name for a planet and its host star, chosen from a list of already-confirmed planets. Discoverers cannot name planets themselves. Under the 2022 rules:
+  - names must have long-standing cultural, historical or geographical significance;
+  - the star and planet names share a theme;
+  - names of people (living or dead), pets and organisations are excluded.
+- **"Aakanksha"** (Sanskrit/Hindi for "aspiration" or "longing") can be used now as an informal nickname, as the animation does. Many famous objects have informal nicknames. To become official, the planet would first need to be confirmed and picked for a future campaign. A team would then propose it as a word with cultural meaning, not as a person's name, paired with a host-star name on the same theme (for example, another Sanskrit word about striving or the sky).
+
+Sources: IAU NameExoWorlds rules (https://nameexoworlds.iau.org/2022naming-rules), TESS Follow-up Program (https://heasarc.gsfc.nasa.gov/docs/tess/tfop.html), ExoFOP-TESS submission guide (https://tess.mit.edu/followup/exofop-tess).
+
+### Media
+`media/370612437_animation.mp4` (and `media/252721481_animation.mp4`) is a 14-second explainer showing:
+- the star, and the planet crossing it on the fitted tilted path;
+- the real stacked TESS dimming data with the transit model;
+- where the star is in the sky (Cygnus);
+- its distance (158 light-years).
+
+Make one for any candidate with `python pipeline/11_animation.py <TIC> "<nickname>"`.

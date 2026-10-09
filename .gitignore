@@ -10,3 +10,5 @@ results/*.log
 results/phase2/plots/
 results/phase2/periodograms/
 results/debug/
+data/catalogs/tce/
+results/phase3/audit_codex_raw.log

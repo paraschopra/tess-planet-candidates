@@ -18,3 +18,8 @@ os.environ.setdefault("XDG_CONFIG_HOME", str(CACHE / "xdg"))
 os.environ.setdefault("ASTROPY_CACHE_DIR", str(CACHE / "astropy"))
 os.environ.setdefault("LIGHTKURVE_CACHE_DIR", str(CACHE / "lightkurve"))
 warnings.filterwarnings("ignore", message=".*oktopus.*")
+# Parallelism comes from process pools; keep numerical libraries single-threaded inside each worker
+# (otherwise 12 workers x 14 threads oversubscribe the CPU badly).
+for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
+            "NUMEXPR_NUM_THREADS"):
+    os.environ.setdefault(var, "1")

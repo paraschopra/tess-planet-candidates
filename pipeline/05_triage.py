@@ -26,10 +26,12 @@ search thresholds, recomputes simple diagnostics on the cleaned light curve:
 Hard flags are direct evidence of an impostor; soft flags (SOFT_FLAGS) are context.
 
 Writes results/phase2/triage.csv.
-Usage: python pipeline/05_triage.py [WORKERS]
+Usage: python pipeline/05_triage.py [WORKERS] [STARS_DIR OUT_CSV]
+  (phase 3 runs it on the upside-down light curves: results/phase3/inverted/stars -> inverted_triage.csv)
 """
 import json
 import sys
+from pathlib import Path
 from multiprocessing import Pool
 
 import env  # noqa: F401
@@ -57,6 +59,8 @@ def diagnostics(args):
     """Light-curve based checks for all signals of one star."""
     rec, _ = args
     lc, _, _ = L.reject_bad_sectors(L.load_star(rec["tic"]))
+    if rec.get("flipped"):  # false-alarm baseline: dips become bumps (see 06_inverted.py)
+        lc["flux"] = 2 - lc["flux"]
     return diagnostics_on(L.bin_lc(L.clean(lc)), rec)
 
 
@@ -145,7 +149,9 @@ def diagnostics_on(c, rec):
 
 
 def main():
-    recs = [json.loads(p.read_text()) for p in sorted((OUT / "stars").glob("*.json"))]
+    stars_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else OUT / "stars"
+    out_csv = Path(sys.argv[3]) if len(sys.argv) > 3 else OUT / "triage.csv"
+    recs = [json.loads(p.read_text()) for p in sorted(stars_dir.glob("*.json"))]
     recs = [r for r in recs if r["status"] == "ok"]
     tg = pd.read_csv(RESULTS / "targets_ranked.csv").set_index("TIC")
 
@@ -226,7 +232,7 @@ def main():
     sig["clean"] = sig["passes"] & (sig["flags"] == "")
     sig["survivor"] = sig["passes"] & (sig["hard_flags"] == "")
     sig = sig.sort_values(["survivor", "clean", "sde"], ascending=False)
-    sig.to_csv(OUT / "triage.csv", index=False)
+    sig.to_csv(out_csv, index=False)
 
     p = sig[sig["passes"]]
     print(f"{len(recs)} stars searched; {len(p)} signals pass thresholds; "
