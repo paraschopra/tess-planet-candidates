@@ -342,16 +342,15 @@ def render(fig, t):
             text(ax, x0, 448, title, 30, a, ACCENT, weight="bold")
             text(ax, x0, 398, name, 18, a, FG)
             # "constellation" spelled out: a direction on the sky, not a place (Andromeda is not the galaxy)
-            lines = [f"in the constellation {i['const']}",
-                     f"{i['dist'] * LY:.0f} light-years away, in our Milky Way",
+            lines = [f"{i['const']} constellation, {i['dist'] * LY:.0f} light-years away",
                      f"about {i['rp']:.1f}× Earth's size",
                      f"orbits its star every {i['P']:.2f} days",
                      f"dims it by {i['depth'] / 1e4:.3f}% for {i['t14']:.1f} hours",
                      f"~{i['teq']:.0f} K: far too hot for life"]
             for j, ln in enumerate(lines):
-                text(ax, x0, 348 - j * 46, ln, 18, a, FG if j < 3 else DIM)
+                text(ax, x0, 345 - j * 50, ln, 18, a, FG if j < 2 else DIM)
             loop = (t / 4.0 + 0.5 - 0.12 * k) % 1.0  # a crossing every 4 s; both planets on their stars at frame one
-            draw_disk(ax, x0 + 690, 250, 115, a, i, planet_t=-1.7 + 3.4 * loop, zoom=4, path=True, z=12)
+            draw_disk(ax, x0 + 715, 250, 115, a, i, planet_t=-1.7 + 3.4 * loop, zoom=4, path=True, z=12)
         return
 
     if t < 17:  # how we found them
